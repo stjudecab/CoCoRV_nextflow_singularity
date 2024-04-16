@@ -1,0 +1,1 @@
+bsub -P ALS -J run-cocorv-singularity -q priority -R "rusage[mem=80000]" -oo test_GRCh38.gnomAD.v4exomes_singularity.out -eo test_GRCh38.gnomAD.v4exomes_singularity.err "sh test_GRCh38.gnomAD.v4exomes_singularity.sh"
