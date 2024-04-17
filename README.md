@@ -17,6 +17,11 @@ If you want to install nextflow, please check https://www.nextflow.io/.
 Singularity module is already loaded on our HPC cluster. We don't need to load it.
 
 #### Run CoCoRV pipeline ####
+Download the git repository using the following command:
+```bash
+git clone https://github.com/stjudecab/CoCoRV_nextflow_singularity.git
+```
+Go to the project folder and run main nextflow script *CoCoRVPipeline.nf*
 ```bash
 nextflow run CoCoRVPipeline.nf
 ```
@@ -29,7 +34,7 @@ The CoCoRV nextflow pipeline script, nextflow configuration file, and example ru
 * *nextflow.config*: contains default configuration for running CoCoRV pipeline.
 * *example folder*: contains run specific configuration files. You need to create a configuration file like "input.GRCh38.gnomAD.v4exomes.txt" given in here and update it with case VCF file path and output folder path for your run.
 
-#### GRCh38 using gnmoAD v3 genome data ####
+#### GRCh38 using gnmoAD v4 exome data ####
 To run the CoCoRV pipeline for GRCh38 using gnomAD v4 exome data, an example run script "test_GRCh38.gnomAD.v4exomes_singularity.sh" is given. This test script uses the input configuration file given in here: "example/input.GRCh38.gnomAD.v4exomes.txt". Here we used 407 ALS sporadic case samples (build GRCh38) as case data.
 
 To run "test_GRCh38.gnomAD.v4exomes_singularity.sh" script, update the "inputConfig" parameter to specify the configuration file path in your workspace. Also update the output folder parameter "outputRoot" in the config file "example/input.GRCh38.gnomAD.v4exomes.txt" to specify a different output folder location.
