@@ -1,1 +1,7 @@
 bsub -P ALS -J run-cocorv-singularity -q priority -R "rusage[mem=80000]" -oo test_GRCh38.gnomAD.v4exomes_singularity.out -eo test_GRCh38.gnomAD.v4exomes_singularity.err "sh test_GRCh38.gnomAD.v4exomes_singularity.sh"
+
+bsub -P ALS -J run-cocorv-singularity -q priority -R "rusage[mem=80000]" -oo test_GRCh38.gnomAD.v3genome_singularity.out -eo test_GRCh38.gnomAD.v3genome_singularity.err "sh testGRCh38.gnomAD.v3genome_1KG_singularity.sh"
+
+bsub -P ALS -J run-cocorv-singularity-v2exome -q priority -R "rusage[mem=80000]" -oo test_GRCh37.gnomAD.v2exome_singularity.out -eo test_GRCh37.gnomAD.v2exome_singularity.err "sh testGRCh37.gnomAD.v2exome_1KG_singularity.sh"
+
+
