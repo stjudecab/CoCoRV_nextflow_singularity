@@ -41,8 +41,8 @@ To run "testGRCh37.gnomAD.v2exome_1KG_singularity.sh" script, update the "inputC
 
 To run CoCoRV using different inputs, you need to update "example/input.1KG.GRCh37.txt" and change case file specific parameters which are "caseBed", "caseVCFPrefix", "caseVCFSuffix", "caseSample" and output folder parameter which is "outputRoot".
 
-The test data used here is also available to download from Amazon s3 [s3://cocorv-1kg-grch37-data/](s3://cocorv-1kg-grch37-data/)
-The processed gnomAD v2 exome data used here is also available to download from Amazon s3 [s3://cocorv-resource-files/gnomADv2exome/](s3://cocorv-resource-files/gnomADv2exome/)
+The test data used here is also available to download from Amazon s3 "s3://cocorv-1kg-grch37-data/".
+The processed gnomAD v2 exome data used here is also available to download from Amazon s3 "s3://cocorv-resource-files/gnomADv2exome/".
 
 #### GRCh38 using gnmoAD v4 exome/genome data ####
 To run the CoCoRV pipeline for GRCh38 using gnomAD v4 exome data or genome data, example run scripts "testGRCh38.gnomAD.v4exome_1KG_singularity.sh" and "testGRCh38.gnomAD.v4genome_1KG_singularity.sh" are given. These test scripts use the input configuration file given in here: "example/input.1KG.GRCh38.gnomAD.v4exomes.txt" and "input.1KG.GRCh38.gnomAD.v4genomes.txt". Here we used 23 test samples from 1000 Genomes Project (build GRCh38) as case data.
@@ -51,9 +51,9 @@ To run "testGRCh38.gnomAD.v4exome_1KG_singularity.sh" or "testGRCh38.gnomAD.v4ge
 
 To run CoCoRV using different inputs, you need to update "example/input.1KG.GRCh38.gnomAD.v4exomes.txt" and change case file specific parameters which are "caseBed", "caseVCFPrefix", "caseVCFSuffix", "caseSample" and output folder parameter which is "outputRoot".
 
-The test data used here is also available to download from Amazon s3 [s3://cocorv-1kg-grch38-data/](s3://cocorv-1kg-grch38-data/)
-The processed gnomAD v4 exome data used here is also available to download from Amazon s3 [s3://cocorv-resource-files/gnomADv4exome/](s3://cocorv-resource-files/gnomADv4exome/)
-The processed gnomAD v4 genome data used here is also available to download from Amazon s3 [s3://cocorv-resource-files/gnomADv4genome/](s3://cocorv-resource-files/gnomADv4genome/)
+The test data used here is also available to download from Amazon s3 "s3://cocorv-1kg-grch38-data/".
+The processed gnomAD v4 exome data used here is also available to download from Amazon s3 "s3://cocorv-resource-files/gnomADv4exome/".
+The processed gnomAD v4 genome data used here is also available to download from Amazon s3 "s3://cocorv-resource-files/gnomADv4genome/".
 
 ### Contributors ###
 * Saima Sultana Tithi
