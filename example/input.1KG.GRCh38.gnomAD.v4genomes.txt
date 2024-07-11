@@ -1,27 +1,27 @@
 params {
   // gnomAD V4 files
-  controlCountPrefix="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis/r4/exomes/processed/gnomad.exomes.v4.0.sites.chr"
+  controlCountPrefix="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r4/genomes/processed/gnomad.genomes.v4.0.sites.chr"
   controlCountSuffix=".vcf.bgz.gds"
-  controlAnnoPrefix="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis/r4/exomes/processed/annotate/chr"
+  controlAnnoPrefix="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r4/genomes/processed/annotate/chr"
   controlAnnoSuffix=".annovar.vep.vcf.gz.gds"
-  controlBed="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis/r4/exomes/processed/coverage10x.bed.gz"
+  controlBed="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r4/exomes/processed/coverage10x.bed.gz"
 
   // gnomAD PC and population data from v4
   gnomADPCPosition="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/hail_gnomAD/hail_positions.GRCh38.v4.chr.pos.tsv"
-  loadingPath="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis/r4/exomes/processed/ancestry/gnomad.v4.0.pca_loadings.ht"
-  rfModelPath="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis/r4/exomes/processed/ancestry/gnomad.v4.0.RF_fit.onnx"
-  threshold=0.75 // the threshold used to assign populations/ethnicities. 0.9 is used in gnomAD v2, 0.75 is used in gnomAD v3. For simplicity, 0.75 is used for gnomAD v4, even though different thresholds for different populations might be better. If the probability is below the threhsold, other will be assigned. 
+  loadingPath="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r4/exomes/processed/ancestry/gnomad.v4.0.pca_loadings.ht"
+  rfModelPath="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r4/exomes/processed/ancestry/gnomad.v4.0.RF_fit.onnx"
+  threshold=0.75 // the threshold used to assign populations/ethnicities. 0.9 is used in gnomAD v2, 0.75 is used in gnomAD v3. For simplicity, 0.75 is used for gnomAD v4, even though different thresholds for different populations might be better. If the probability is below the threshold, other will be assigned.
 
   // case files
-  caseBed="/research/groups/wugrp/projects/CReATe_ALS/common/cab/HA_raw/CAB_automapper/gatk4.1.8.1_gVCF/jointVCF/preMerge/re-annotate_021021/perChrom/summaryCount_v2/table/level2_ALS_ALS_FTD_no_c9orf72/coverage.summary.with.position.10x.cds.bed.gz"
-  caseVCFPrefix="/research/groups/wugrp/projects/CReATe_ALS/common/cab/HA_raw/CAB_automapper/gatk4.1.8.1_gVCF/jointVCF/preMerge/re-annotate_021021/perChrom/re-train/chr"
-  caseVCFSuffix=".CReATe_ALS_gatk4.1.8.0.GATK.vcf.gz"
-  caseSample="/research/groups/wugrp/projects/CReATe_ALS/common/cab/HA_raw/CAB_automapper/gatk4.1.8.1_gVCF/jointVCF/preMerge/re-annotate_021021/perChrom/summaryCount_v5/table/sporadic/level2_ALS/cases.txt"
+  caseBed="NA"
+  caseVCFPrefix="/research/groups/cab/projects/Control/common/reference/1000G/GRCh38/high_coverage/CoCoRV-test-GRCh38/gatk/jointVCF/CoCoRV-GRCh38-1KG/CoCoRV-GRCh38-1KG.GATK.chr"
+  caseVCFSuffix=".vcf.gz"
+  caseSample="/research/groups/cab/projects/Control/common/reference/1000G/GRCh38/high_coverage/CoCoRV-test-GRCh38/23_samples.txt"
 
   // output folder
-  outputRoot="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-gnomadv4exome-output"
+  outputRoot="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh38-gnomADv4genome-output"
 
-  // different annovar version from GRCh37
+  // tools
   annovarFolder="/research/groups/cab/projects/Control/common/reference/annovar"
   CoCoRVFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv/"
   // VEP
@@ -42,7 +42,7 @@ params {
   // reference
   refFASTA="/research/rgs01/reference/public/genomes/Homo_sapiens/GRCh38/GRCh38_no_alt/GCA_000001405.15_GRCh38_no_alt_analysis_set.fa" 
   build="GRCh38" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
-  gnomADVersion="v4exome"
+  gnomADVersion="v4genome"
   chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
   // chrSet="21 22"
 

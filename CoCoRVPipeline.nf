@@ -10,14 +10,14 @@ Usage:
     nextflow run CoCoRVPipeline.nf -c inputConfig -profile profileName
 Input:
     * -c: Path of input config file.
-    * -profile: Specify which profle to use when executing nextflow pipeline. Availble options are: "local", "cluster", "conda_GRCh37", "conda_GRCh38"
+    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity"
 """
 
 // Import modules
 include {coverageIntersect;
   normalizeQC;
-  annotateANNOVAR;
-  skipANNOVAR;
+  annotate;
+  skipAnnotation;
   caseGenotypeGDS;
   caseAnnotationGDS;
   extractGnomADPositions;
@@ -31,9 +31,8 @@ include {coverageIntersect;
 workflow {
   // coverage  
   if (params.caseBed == "NA") {
-    intersectChannel = Channel.fromPath(params.controlBed)   
-  }
-  else {
+    intersectChannel = Channel.value(params.controlBed)
+  } else {
     coverageIntersect(params.caseBed, params.controlBed)
     intersectChannel = coverageIntersect.out
   }
@@ -45,11 +44,11 @@ workflow {
 
   // annotate
   if (params.caseAnnotatedVCFPrefix == "NA") {
-    annotateANNOVAR(normalizeQC.out, params.build)
-    annotateChannel = annotateANNOVAR.out
+    annotate(normalizeQC.out, params.build)
+    annotateChannel = annotate.out
   } else {
-    skipANNOVAR(normalizeQC.out)
-    annotateChannel = skipANNOVAR.out
+    skipAnnotation(normalizeQC.out)
+    annotateChannel = skipAnnotation.out
   }
 
   // case genoypte vcf to gds

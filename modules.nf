@@ -45,7 +45,7 @@ process normalizeQC {
 }
 
 
-process annotateANNOVAR {
+process annotate {
   tag "${chr}"
   publishDir "${params.outputRoot}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-python:v1'
@@ -73,13 +73,26 @@ process annotateANNOVAR {
     }
   }
   """
-  outputPrefix="${chr}.annotated"
+  if [[ ${params.addVEP} != "T" ]]; then
+    outputPrefix="${chr}.annotated"
+  else 
+    outputPrefix="${chr}.annotated.annovar"
+  fi
   bash ${params.CoCoRVFolder}/utilities/annotate.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
+
+  if [[ ${params.addVEP} == "T" ]]; then
+    module load perl/5.28.1
+    module load htslib/1.10.2
+    module load bcftools/1.15.1
+    module load samtools/1.10
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${chr}.annotated.annovar.vcf.gz ${build} ${chr}.annotated ${params.reference} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
+  fi
   """
 }
  
-process skipANNOVAR {
+process skipAnnotation {
   tag "${chr}"
+  container 'stithi/cocorv-nextflow-python:v1'
 
   input:
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
@@ -309,6 +322,10 @@ process mergeCoCoRVResults {
 process QQPlotAndFDR {
   publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v1'
+
+  memory { 10.GB * task.attempt }
+  errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
+  maxRetries 1
 
   input: 
     tuple path("association.tsv"), 

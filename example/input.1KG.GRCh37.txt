@@ -21,8 +21,21 @@ params {
   outputRoot="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output"
 
   // tools
-  annovarFolder="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/tools/annovar"
+  annovarFolder="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/tools/annovar_2017-07-17"
   CoCoRVFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv/"
+  // VEP
+  vepFolder="/research/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep"
+  cache="/research/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep/cache"
+  lofteeFolder="/research/groups/cab/projects/Control/common/reference/VEP_v103/other_data/loftee/loftee"
+  lofteeDataFolder="/research/groups/cab/projects/Control/common/reference/VEP_v103/other_data/loftee/data"
+  caddSNV="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/CADD/hg19/whole_genome_SNVs.tsv.gz"
+  caddIndel="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/CADD/hg19/InDels.tsv.gz"
+  spliceAISNV="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/SpliceAI/spliceai_scores.raw.snv.hg19.vcf.gz"
+  spliceAIIndel="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/SpliceAI/spliceai_scores.raw.indel.hg19.vcf.gz"
+  AM="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/AlphaMissense"
+  REVEL="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/REVEL"
+  reference="/research/groups/cab/projects/Control/common/reference/Homo_sapiens/GRCh37-lite/FASTA/GRCh37-lite.fa"
+  perlThread="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
 
   // reference
   refFASTA="/research/rgs01/applications/hpcf/authorized_apps/cab/Automation/REF/Homo_sapiens/NCBI/GRCh37-lite/bwa-index/GRCh37-lite_wochr/GRCh37-lite.fa" 
@@ -37,11 +50,21 @@ params {
   variantExclude="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KG/gnomAD.exclude.allow.segdup.lcr.v3.txt.gz"
   AFMax=1e-4
   variantMissing=0.1
-  annotationList="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV_pipeline/CoCoRV_nextflow/example/annotationUsed.txt"
-  variantGroup="functionREVEL65" 
-  groupFunctionConfig="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV_pipeline/CoCoRV_nextflow/example/variantSet.txt"
-  extraParamJason="NA"
+  variantGroup="annovar_pathogenic" 
+  REVELThreshold=0.65
+  pLDControl=0.05
   highLDVariantFile="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KG/full_vs_gnomAD.p0.05.OR1.ignoreEthnicityInLD.rds"
+
+  // CoCoRV setting
+  //ACANConfig="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/stratified_config_gnomad.txt"
+  //variantExclude="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KG/gnomAD.exclude.allow.segdup.lcr.v3.txt.gz"
+  //AFMax=1e-4
+  //variantMissing=0.1
+  //annotationList="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV_pipeline/CoCoRV_nextflow/example/annotationUsed.txt"
+  //variantGroup="functionREVEL65" 
+  //groupFunctionConfig="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV_pipeline/CoCoRV_nextflow/example/variantSet.txt"
+  //extraParamJason="NA"
+  //highLDVariantFile="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KG/full_vs_gnomAD.p0.05.OR1.ignoreEthnicityInLD.rds"
 
 
 }
