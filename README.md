@@ -51,9 +51,9 @@ To run "testGRCh38.gnomAD.v4exome_1KG_singularity.sh" or "testGRCh38.gnomAD.v4ge
 
 To run CoCoRV using different inputs, you need to update "example/input.1KG.GRCh38.gnomAD.v4exomes.txt" and change case file specific parameters which are "caseBed", "caseVCFPrefix", "caseVCFSuffix", "caseSample" and output folder parameter which is "outputRoot".
 
-The test data used here is also available to download from Amazon s3: s3://cocorv-1kg-grch38-data/
-The processed gnomAD v4 exome data used here is also available to download from Amazon s3: s3://cocorv-resource-files/gnomADv4exome/
-The processed gnomAD v4 genome data used here is also available to download from Amazon s3: s3://cocorv-resource-files/gnomADv4genome/
+The test data used here is also available to download from Amazon s3: (s3://cocorv-1kg-grch38-data/)
+The processed gnomAD v4 exome data used here is also available to download from Amazon s3: (https://cocorv-resource-files.s3.amazonaws.com/gnomADv2exome/)
+The processed gnomAD v4 genome data used here is also available to download from Amazon s3: (https://cocorv-resource-files.s3.amazonaws.com/gnomADv2exome/)
 
 ### Contributors ###
 * Saima Sultana Tithi
