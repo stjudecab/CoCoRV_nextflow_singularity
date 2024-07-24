@@ -117,6 +117,7 @@ process caseGenotypeGDS {
   tag "${chr}"
   container 'stithi/cocorv-nextflow-r:v1'
 
+  cpus 16
   memory { 20.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
@@ -132,7 +133,7 @@ process caseGenotypeGDS {
 
   script:
   """
-  Rscript ${params.CoCoRVFolder}/utilities/vcf2gds.R ${normalizedQCedVCFFile} ${chr}.biallelic.leftnorm.ABCheck.vcf.gz.gds 1
+  Rscript ${params.CoCoRVFolder}/utilities/vcf2gds.R ${normalizedQCedVCFFile} ${chr}.biallelic.leftnorm.ABCheck.vcf.gz.gds 16
   """
 }
 
