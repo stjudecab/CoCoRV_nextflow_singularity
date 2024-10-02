@@ -9,16 +9,16 @@ params {
   gnomADPCPosition="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r2.1.1/ancestry/hail_positions.GRCh37.chr.pos.tsv"
   loadingPath="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r2.1.1/ancestry/gnomad.r2.1.pca_loadings.ht"
   rfModelPath="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r2.1.1/ancestry/gnomad.r2.1.RF_fit.onnx"
-  threshold=0.9 // the threshold used to assign populations/ethnicities. 0.9 is used in gnomAD v2, 0.75 is used in gnomAD v3. If the probability is below the threshold, other will be assigned. 
+  threshold=0.9 // the threshold used to assign populations/ethnicities. 0.9 is used in gnomAD v2, 0.75 is used in gnomAD v3. If the probability is below the threshold, other will be assigned.   
 
-  // case files
-  caseBed="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/samples.1KG.coverage10x.bed.gz"
-  caseVCFPrefix="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/vcf_vqsr_keepAC0/samples.1KG.chr"
-  caseVCFSuffix=".vcf.gz"
-  caseSample="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/samples.txt"
+//case files
+caseBed="/research/groups/cab/projects/Synthetic_Control/common/EXOME/Raw/joint_vcf/GRCh37/vcf_sj/cdsOnly/summaryCount/table/level1_ALL_SJAML_SJnonAML_Alzheimer_1KG/coverage.summary.with.position.10x.bed.gz"
+  caseVCFPrefix="/research/groups/cab/projects/Synthetic_Control/common/EXOME/Raw/joint_vcf/GRCh37/vcf_sjlife_cns/cdsOnly/vqsr_normalized/qc_normalize/normalized/chr"
+  caseVCFSuffix=".biallelic.leftnorm.ABCheck.vcf.gz"
+  caseSample="/research/groups/cab/projects/Synthetic_Control/common/EXOME/Raw/joint_vcf/GRCh37/vcf_sjlife_cns/cdsOnly/vqsr_normalized/qc_normalize/normalized/caseSamples.txt"
 
   // output folder
-  outputRoot="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-2"
+  outputRoot="/research/groups/cab/projects/Synthetic_Control/common/EXOME/Raw/joint_vcf/GRCh37/vcf_sjlife_cns/cdsOnly/CoCoRV-nextflow-results-SJLIFE-CNS_2024Oct2"
 
   // tools
   annovarFolder="/research/groups/cab/projects/Control/common/reference/annovar"
@@ -40,10 +40,10 @@ params {
   // reference
   refFASTA="/research/rgs01/applications/hpcf/authorized_apps/cab/Automation/REF/Homo_sapiens/NCBI/GRCh37-lite/bwa-index/GRCh37-lite_wochr/GRCh37-lite.fa" 
   build="GRCh37" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
+  gnomADVersion="v2exome"
   // later I may include chr X
   chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
   // chrSet="21 22"
-
 
   // CoCoRV setting
   ACANConfig="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/stratified_config_gnomad.txt"

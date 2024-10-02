@@ -1,7 +1,7 @@
 process coverageIntersect {
   tag "${caseBed}"
   publishDir "${params.outputRoot}", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   input:
     path caseBed
@@ -20,7 +20,7 @@ process coverageIntersect {
 process normalizeQC {
   tag "${caseVCFPrefix}_${chr}"
   publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   input:
     val caseVCFPrefix
@@ -48,7 +48,7 @@ process normalizeQC {
 process annotate {
   tag "${chr}"
   publishDir "${params.outputRoot}/annotation", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   memory { 20.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
@@ -78,7 +78,7 @@ process annotate {
   else 
     outputPrefix="${chr}.annotated.annovar"
   fi
-  bash ${params.CoCoRVFolder}/utilities/annotate.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
+  bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
   if [[ ${params.addVEP} == "T" ]]; then
     module load perl/5.28.1
@@ -92,7 +92,7 @@ process annotate {
  
 process skipAnnotation {
   tag "${chr}"
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   input:
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
@@ -115,9 +115,9 @@ process skipAnnotation {
 
 process caseGenotypeGDS {
   tag "${chr}"
-  container 'stithi/cocorv-nextflow-r:v1'
+  container 'stithi/cocorv-nextflow-r:v4'
 
-  cpus 16
+  cpus params.cpus
   memory { 20.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
@@ -133,13 +133,13 @@ process caseGenotypeGDS {
 
   script:
   """
-  Rscript ${params.CoCoRVFolder}/utilities/vcf2gds.R ${normalizedQCedVCFFile} ${chr}.biallelic.leftnorm.ABCheck.vcf.gz.gds 16
+  Rscript ${params.CoCoRVFolder}/utilities/vcf2gds.R ${normalizedQCedVCFFile} ${chr}.biallelic.leftnorm.ABCheck.vcf.gz.gds ${params.cpus}
   """
 }
 
 process caseAnnotationGDS {
   tag "${chr}"
-  container 'stithi/cocorv-nextflow-r:v1'
+  container 'stithi/cocorv-nextflow-r:v4'
 
   memory { 20.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
@@ -163,7 +163,7 @@ process caseAnnotationGDS {
 process extractGnomADPositions {
   tag "${chr}"
   publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   input: 
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
@@ -179,7 +179,7 @@ process extractGnomADPositions {
 
 process mergeExtractedPositions {
   publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   input: 
     path extractedVCFFile
@@ -195,7 +195,7 @@ process mergeExtractedPositions {
 
 process RFPrediction {
   publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v1'
+  container 'stithi/cocorv-nextflow-python:v3'
 
   input: 
     path VCFForPrediction
@@ -206,13 +206,13 @@ process RFPrediction {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/gnomADPCAndAncestry.sh ${params.CoCoRVFolder} ${params.loadingPath} ${params.rfModelPath} ${VCFForPrediction} ${params.build} "PC.population.output.gz" ${params.threshold} "casePopulation.txt"
+  bash ${params.CoCoRVFolder}/utilities/gnomADPCAndAncestry_docker.sh ${params.CoCoRVFolder} ${params.loadingPath} ${params.rfModelPath} ${VCFForPrediction} ${params.build} "PC.population.output.gz" ${params.threshold} "casePopulation.txt"
   """
 }
 
 process CoCoRV {
   tag "$chr"
-  container 'stithi/cocorv-nextflow-r:v1'
+  container 'stithi/cocorv-nextflow-r:v4'
 
   memory { 100.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
@@ -237,7 +237,10 @@ process CoCoRV {
     controlCount=params.controlCountPrefix+chr+params.controlCountSuffix 
   }
   """
-  otherOptions="${params.CoCoRVOptions}"
+  otherOptions=""
+  if [[ "${params.CoCoRVOptions}" != "NA" ]]; then
+    otherOptions="${params.CoCoRVOptions}"
+  fi
   if [[ "${params.groupFunctionConfig}" != "NA" ]]; then
     otherOptions="\${otherOptions} --variantGroupCustom ${params.groupFunctionConfig}"
   fi
@@ -250,11 +253,8 @@ process CoCoRV {
   if [[ "${params.highLDVariantFile}" != "NA" ]]; then
     otherOptions="\${otherOptions} --highLDVariantFile ${params.highLDVariantFile}"
   fi
-  if [[ "${params.reference}" != "GRCh37" ]]; then
-    otherOptions="\${otherOptions} --reference ${params.reference}"
-  fi
-  if [[ "${params.gnomADVersion}" != "v2exome" ]]; then
-    otherOptions="\${otherOptions} --gnomADVersion ${params.gnomADVersion}"
+  if [[ "${params.variantExclude}" != "NA" ]]; then
+    otherOptions="\${otherOptions} --variantExclude ${params.variantExclude}"
   fi
   if [[ "${params.variantInclude}" != "NA" ]]; then
     otherOptions="\${otherOptions} --variantInclude ${params.variantInclude}"
@@ -271,12 +271,14 @@ process CoCoRV {
       --ACANConfig ${params.ACANConfig} \
       --caseGroup ${ancestryFile} \
       --minREVEL ${params.REVELThreshold} \
-      --variantExcludeFile ${params.variantExclude}  \
       --checkHighLDInControl \
       --pLDControl ${params.pLDControl} \
       --fullCaseGenotype \
+      --reference ${params.reference} \
+      --gnomADVersion ${params.gnomADVersion} \
       --controlAnnoGDSFile ${controlAnnotated} \
       --caseAnnoGDSFile ${caseAnnoGDS} \
+      --batchSize ${params.batchSize} \
       \${otherOptions} \
       ${controlCount} \
       ${caseGenotypeGDS}
@@ -285,7 +287,7 @@ process CoCoRV {
 
 process mergeCoCoRVResults {
   publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
-  container 'stithi/cocorv-nextflow-r:v1'
+  container 'stithi/cocorv-nextflow-r:v4'
 
   input:
     path associationResult
@@ -322,7 +324,7 @@ process mergeCoCoRVResults {
 
 process QQPlotAndFDR {
   publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
-  container 'stithi/cocorv-nextflow-r:v1'
+  container 'stithi/cocorv-nextflow-r:v4'
 
   memory { 10.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }

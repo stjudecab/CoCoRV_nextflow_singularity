@@ -1,5 +1,0 @@
-library(devtools)
-library(roxygen2)
-document("CoCoRV")
-path = build("CoCoRV")
-install.packages(path)
