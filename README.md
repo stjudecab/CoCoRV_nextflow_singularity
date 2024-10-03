@@ -31,7 +31,7 @@ It will print the help message.
 The CoCoRV nextflow pipeline script, nextflow configuration file, and example run configuration files are provided in this repository.
 
 * *CoCoRVPipeline.nf*: main nextflow script for CoCoRV pipeline.
-* *nextflow.config*: contains default configuration for running CoCoRV pipeline.
+* *nextflow.config*: contains default configuration for running CoCoRV pipeline. Please update the "singularity.cacheDir" parameter inside "cluster_singularity" profile to specify a folder which can be used by Singularity to cache our pipeline's docker images (it can be any folder in your local cluster or local computer where you have full access).
 * *example folder*: contains run specific configuration files. You need to create a configuration file like "input.1KG.GRCh38.gnomAD.v4.1exomes.txt" or "input.1KG.GRCh38.gnomAD.v4.1genomes.txt" given in here and update it with case VCF file path and output folder path for your run.
 
 #### GRCh37 using gnmoAD v2 exome data ####
