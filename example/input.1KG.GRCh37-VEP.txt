@@ -18,7 +18,7 @@ params {
   caseSample="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/samples.txt"
 
   // output folder
-  outputRoot="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-3"
+  outputRoot="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-4"
 
   // tools
   annovarFolder="/research/groups/cab/projects/Control/common/reference/annovar"
@@ -44,6 +44,7 @@ params {
   chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
   // chrSet="21 22"
 
+
   // CoCoRV setting
   ACANConfig="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KGAllChrSmall/stratified_config_gnomad.txt"
   variantExclude="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KG/gnomAD.exclude.allow.segdup.lcr.v3.txt.gz"
@@ -53,5 +54,7 @@ params {
   REVELThreshold=0.65
   pLDControl=0.05
   highLDVariantFile="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV/example/1KG/full_vs_gnomAD.p0.05.OR1.ignoreEthnicityInLD.rds"
+
+  addVEP="T"
 
 }

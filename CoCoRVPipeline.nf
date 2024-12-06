@@ -20,12 +20,15 @@ include {coverageIntersect;
   skipAnnotation;
   caseGenotypeGDS;
   caseAnnotationGDS;
+  skipGenotypeGDS;
+  skipAnnotationGDS;
   extractGnomADPositions;
   mergeExtractedPositions;
   RFPrediction;
   CoCoRV;
   mergeCoCoRVResults;
-  QQPlotAndFDR} from './modules.nf'
+  QQPlotAndFDR;
+  postCheck} from './modules.nf'
 
 // main pipeline
 workflow {
@@ -42,21 +45,32 @@ workflow {
   chromChannel = Channel.fromList(Arrays.asList(chromosomes))
   normalizeQC(params.caseVCFPrefix, chromChannel, params.caseVCFSuffix)
 
-  // annotate
-  if (params.caseAnnotatedVCFPrefix == "NA") {
-    annotate(normalizeQC.out, params.build)
-    annotateChannel = annotate.out
-  } else {
-    skipAnnotation(normalizeQC.out)
-    annotateChannel = skipAnnotation.out
+  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {
+    // annotate
+    if (params.caseAnnotatedVCFPrefix == "NA") {
+      annotate(normalizeQC.out, params.build)
+      annotateChannel = annotate.out
+    } else {
+      skipAnnotation(normalizeQC.out)
+      annotateChannel = skipAnnotation.out
+    }
+
+    // case genoypte vcf to gds
+    caseGenotypeGDS(normalizeQC.out)
+    caseGenotypeGDSChannel = caseGenotypeGDS.out
+
+    // case annotation to gds
+    caseAnnotationGDS(annotateChannel)
+    caseAnnotationGDSChannel = caseAnnotationGDS.out
   }
+  else {
+    //skip annotation and GDS conversion
+    skipGenotypeGDS(normalizeQC.out)
+    caseGenotypeGDSChannel = skipGenotypeGDS.out
 
-  // case genoypte vcf to gds
-  caseGenotypeGDS(normalizeQC.out)
-
-  // case annotation to gds
-  caseAnnotationGDS(annotateChannel)
-
+    skipAnnotationGDS(skipGenotypeGDS.out)
+    caseAnnotationGDSChannel = skipAnnotationGDS.out
+  }
 
   // run gnomAD based population prediction
   if (params.casePopulation == "NA") {
@@ -74,7 +88,7 @@ workflow {
 
   // run CoCoRV
   // RFPrediction.out.view()
-  CoCoRV(caseGenotypeGDS.out.join(caseAnnotationGDS.out), 
+  CoCoRV(caseGenotypeGDSChannel.join(caseAnnotationGDSChannel), 
     intersectChannel,
     populationChannel)
 
@@ -83,6 +97,7 @@ workflow {
     CoCoRV.out[2].collect())
 
   // QQ plot and FDR
-  QQPlotAndFDR(mergeCoCoRVResults.out)
+  QQPlotAndFDR(mergeCoCoRVResults.out[0], mergeCoCoRVResults.out[1], mergeCoCoRVResults.out[2])
+  postCheck(mergeCoCoRVResults.out[0], params.topK, params.caseControl)
 }
 

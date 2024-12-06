@@ -25,7 +25,11 @@ RUN apt-get update && apt-get install -y build-essential python3.10-dev libpq-de
     python3.10 -m pip install --trusted-host pypi.python.org psycopg2-binary Cython numpy scikit-learn gnomad==0.7.1 hail==0.2.128 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN apt-get update && apt-get install -y samtools libdbi-perl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 ENV PYSPARK_SUBMIT_ARGS="--driver-memory 40G pyspark-shell"
+ENV PERL5LIB="/usr/lib/x86_64-linux-gnu/perl5/5.34/"
 
 # Define working directory.
 WORKDIR /opt
@@ -39,6 +43,8 @@ RUN cd /opt && \
 
 COPY gnomADPCAndAncestry_docker.sh /opt/cocorv/utilities
 COPY annotate_docker.sh /opt/cocorv/utilities
+COPY checkFPGenes.sh /opt/cocorv/utilities
+COPY postCheckCoCoRV_docker.sh /opt/cocorv/utilities
 
 RUN chmod -R a+x /opt/cocorv/utilities
 
@@ -46,6 +52,7 @@ COPY annovar /opt/annovar
 RUN chmod -R a+x /opt/annovar
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -s /usr/lib/x86_64-linux-gnu/perl5/5.34 /usr/lib/x86_64-linux-gnu/perl/5.34
 
 # by default /bin/bash is executed
 CMD ["/bin/bash"]

@@ -1,0 +1,140 @@
+app_content:
+  code_package: 672bad1daddcb32e1bacf83d
+  entrypoint: main.nf
+class: nextflow
+cwlVersion: None
+doc: A cloud based pipeline for rare variant analysis using public summary counts
+  for prioritizing disease predisposition genes in rare disease studies.
+inputs:
+- doc: resource files containing reference fasta and gnomAD files, please select the
+    "resource_files/hg19" directory for GRCh37 build or "resource_files/hg38" directory
+    for GRCh38 build from "Files" section
+  id: resourceFiles
+  inputBinding:
+    prefix: --resourceFiles
+  type:
+  - Directory
+- doc: bed file containing good coverage positions where 90% samples have coverage
+    >= 10, optional, if not specified, good coverage positions from gnomAD will be
+    used
+  id: caseBed
+  inputBinding:
+    prefix: --caseBed
+  type:
+  - File
+  - 'null'
+- doc: directory containing case vcf files, all vcf file names must be in "*.chr{chrNum}.vcf.gz"
+    format, user should split the joint called vcf file chromosomewise and upload
+    multiple vcf files, so that nextflow app can process multiple vcf files parallelly
+  id: caseVCFFolder
+  inputBinding:
+    prefix: --caseVCFFolder
+  type:
+  - Directory
+- doc: prefix of case vcf files, filename prefix before chromosome number, all vcf
+    file names must be in "*.chr{chrNum}.vcf.gz" format
+  id: caseVCFPrefix
+  inputBinding:
+    prefix: --caseVCFPrefix
+  type:
+  - string
+- doc: suffix of case vcf files, filename suffix after chromosome number, all vcf
+    file names must be in "*.chr{chrNum}.vcf.gz" format
+  id: caseVCFSuffix
+  inputBinding:
+    prefix: --caseVCFSuffix
+  type:
+  - string
+- default: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+  doc: list of chromosomes you want to analyze, you can test only for chromosome 21
+    and 22, in that case, it will be "21 22"
+  id: chrSet
+  inputBinding:
+    prefix: --chrSet
+  sbg:toolDefaultValue: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+  type:
+  - string
+- doc: file containing estimation of the population/ethnicity of case samples using
+    gnomAD classifier, optional, if not specified nextflow app will estimate the population
+    using gnomAD classifier
+  id: casePopulation
+  inputBinding:
+    prefix: --casePopulation
+  type:
+  - File
+  - 'null'
+- doc: one column text file containing list of samples, one sample name per line
+  id: caseSample
+  inputBinding:
+    prefix: --caseSample
+  type:
+  - File
+- default: v2exome
+  doc: gnomAD version, allowed values are "v2exome", "v4exome", "v4genome" ("v2exome"
+    use build GRCh37, "v4exome" and "v4genome" use build GRCh38)
+  id: gnomADVersion
+  inputBinding:
+    prefix: --gnomADVersion
+  sbg:toolDefaultValue: v2exome
+  type:
+  - string
+  - 'null'
+- default: 0.0001
+  doc: the maximum of the alternate alleles frequency
+  id: AFMax
+  inputBinding:
+    prefix: --AFMax
+  sbg:toolDefaultValue: 0.0001
+  type:
+  - float
+  - 'null'
+- default: 0.1
+  doc: the maximum missingness allowed for a variant
+  id: variantMissing
+  inputBinding:
+    prefix: --variantMissing
+  sbg:toolDefaultValue: 0.1
+  type:
+  - float
+  - 'null'
+- default: annovar_pathogenic
+  doc: predefined variant group to define the variants of interest, allowed values
+    are "annovar_pathogenic", "annovar_function", "annovar_LOF", "annovar_missense",
+    "annovar_synonym", "annovar_splicing"
+  id: variantGroup
+  inputBinding:
+    prefix: --variantGroup
+  sbg:toolDefaultValue: annovar_pathogenic
+  type:
+  - string
+  - 'null'
+- default: 0.65
+  doc: the minimum REVEL score for pathogenic missense variants
+  id: REVELThreshold
+  inputBinding:
+    prefix: --REVELThreshold
+  sbg:toolDefaultValue: 0.65
+  type:
+  - float
+  - 'null'
+- default: 4
+  doc: number of cpus for gds conversion (for caseGenotypeGDS module)
+  id: cpus
+  inputBinding:
+    prefix: --cpus
+  sbg:toolDefaultValue: 4
+  type:
+  - int
+  - 'null'
+outputs:
+- doc: The output directory specified in publishDir in the workflow.
+  id: output_dir
+  outputBinding:
+    glob: outputs
+  type: Directory
+requirements:
+- class: InlineJavascriptRequirement
+- class: InitialWorkDirRequirement
+  listing:
+  - $(inputs.caseVCF)
+  - $(inputs.caseSample)
