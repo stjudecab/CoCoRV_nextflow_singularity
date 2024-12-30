@@ -10,7 +10,7 @@ Usage:
     nextflow run CoCoRVPipeline.nf -c inputConfig -profile profileName
 Input:
     * -c: Path of input config file.
-    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity"
+    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity_lsf", "cluster_apptainer_slurm"
 """
 
 // Import modules
@@ -44,7 +44,7 @@ workflow {
 
   // annotate
   if (params.caseAnnotatedVCFPrefix == "NA") {
-    annotate(normalizeQC.out, params.build)
+    annotate(normalizeQC.out, params.reference)
     annotateChannel = annotate.out
   } else {
     skipAnnotation(normalizeQC.out)
@@ -64,7 +64,8 @@ workflow {
     extractGnomADPositions(normalizeQC.out)
 
     // merge extracted gnomAD positions
-    mergeExtractedPositions(extractGnomADPositions.out.collect())
+    mergeExtractedPositions(extractGnomADPositions.out[0].collect(),
+                            extractGnomADPositions.out[1].collect())
 
     RFPrediction(mergeExtractedPositions.out)
     populationChannel = RFPrediction.out[1]

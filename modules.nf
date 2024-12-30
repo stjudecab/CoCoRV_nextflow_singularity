@@ -12,7 +12,7 @@ process coverageIntersect {
 
   script:
   """
-  bedtools intersect -sorted -a ${caseBed} -b ${controlBed} > \
+  bedtools intersect -sorted -a ${caseBed} -b ${controlBed} | gzip > \
         "intersect.coverage10x.bed.gz"
   """
 }
@@ -56,7 +56,7 @@ process annotate {
 
   input:
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
-    val build
+    val reference
 
   output:
     tuple val("${chr}"),
@@ -64,28 +64,35 @@ process annotate {
 
   script:
   refbuild = null
-  if (build == "GRCh37") {
+  if (reference == "GRCh37") {
     refbuild="hg19"  
   }
   else {
-    if (build == "GRCh38") {
+    if (reference == "GRCh38") {
      refbuild="hg38"   
     }
   }
   """
-  if [[ ${params.addVEP} != "T" ]]; then
+  if [[ ${params.annotationTool} == "ANNOVAR" ]]; then
     outputPrefix="${chr}.annotated"
-  else 
-    outputPrefix="${chr}.annotated.annovar"
+    bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
   fi
-  bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
-  if [[ ${params.addVEP} == "T" ]]; then
+  if [[ ${params.annotationTool} == "VEP" ]]; then
     module load perl/5.28.1
     module load htslib/1.10.2
     module load bcftools/1.15.1
     module load samtools/1.10
-    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${chr}.annotated.annovar.vcf.gz ${build} ${chr}.annotated ${params.reference} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
+
+    outputPrefix="${chr}.annotated"
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${normalizedQCedVCFFile} ${reference} ${chr}.annotated ${params.vepFASTA} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
+  fi
+  
+  if [[ ${params.annotationTool} == "ANNOVAR_VEP" ]]; then
+    outputPrefix="${chr}.annotated.annovar"
+    bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
+
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.vepFASTA} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
   fi
   """
 }
@@ -170,10 +177,12 @@ process extractGnomADPositions {
 
   output: 
     path "${chr}.extracted.vcf.gz"
+    path "${chr}.extracted.vcf.gz.tbi"
 
   script:
   """
   bcftools view -R ${params.gnomADPCPosition} -Oz -o ${chr}.extracted.vcf.gz ${normalizedQCedVCFFile}
+  bcftools index -t ${chr}.extracted.vcf.gz
   """
 }
 
@@ -183,13 +192,14 @@ process mergeExtractedPositions {
 
   input: 
     path extractedVCFFile
+    path extractedVCFFileIndex
 
   output: 
     path("all.extracted.vcf.bgz")
 
   script:
   """
-  bcftools concat -Oz -o "all.extracted.vcf.bgz" ${extractedVCFFile}
+  bcftools concat -a -Oz -o "all.extracted.vcf.bgz" ${extractedVCFFile}
   """
 }
 
@@ -206,7 +216,7 @@ process RFPrediction {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/gnomADPCAndAncestry_docker.sh ${params.CoCoRVFolder} ${params.loadingPath} ${params.rfModelPath} ${VCFForPrediction} ${params.build} "PC.population.output.gz" ${params.threshold} "casePopulation.txt"
+  bash ${params.CoCoRVFolder}/utilities/gnomADPCAndAncestry_docker.sh ${params.CoCoRVFolder} ${params.loadingPath} ${params.rfModelPath} ${VCFForPrediction} ${params.reference} "PC.population.output.gz" ${params.threshold} "casePopulation.txt"
   """
 }
 
@@ -229,14 +239,40 @@ process CoCoRV {
     path("${chr}.control.group")
 
   script:
+  chrOnly = chr
+  start = ""
+  end = ""
   if (chr == "NA") {
-    controlAnnotated=params.controlAnnoPrefix+params.controlAnnoSuffix
-    controlCount=params.controlCountPrefix+params.controlCountSuffix 
+    // NA to use no chr in the controls
+    chrOnly = "" 
+  } else if (chr.matches(".*_.*")) {
+    // this is useful for shad based case data, such as 1_13004384_121976459
+    // for chromosome 1 within the region 13004384:121976459, and will match
+    // chromosome 1 for the control data
+    parts = chr.split("_")
+    chrOnly = parts[0]
+    start = parts[1]
+    end = parts[2]
   } else {
-    controlAnnotated=params.controlAnnoPrefix+chr+params.controlAnnoSuffix
-    controlCount=params.controlCountPrefix+chr+params.controlCountSuffix 
   }
+  controlAnnotated=params.controlAnnoPrefix+chrOnly+params.controlAnnoSuffix
+  controlCount=params.controlCountPrefix+chrOnly+params.controlCountSuffix
   """
+  if [[ "${start}" != "" ]]; then
+    # overlap with the shad region
+    checkChr=\$(zcat ${intersectBed} | head -1 | cut -f1)
+    if [[ \${checkChr} =~ "chr" ]]; then
+      chrString="chr"$chrOnly
+    else
+      chrString=$chrOnly
+    fi
+    finalBed="intersect.bed.gz"
+    printf "\$chrString\t$start\t$end\n" > shad.bed
+    bedtools intersect -a ${intersectBed} -b shad.bed | gzip > \${finalBed}
+  else
+    finalBed=${intersectBed}
+  fi
+
   otherOptions=""
   if [[ "${params.CoCoRVOptions}" != "NA" ]]; then
     otherOptions="${params.CoCoRVOptions}"
@@ -264,7 +300,7 @@ process CoCoRV {
       --sampleList ${params.caseSample} \
       --outputPrefix ${chr} \
       --AFMax ${params.AFMax} \
-      --bed ${intersectBed} \
+      --bed \${finalBed} \
       --variantMissing ${params.variantMissing} \
       --variantGroup ${params.variantGroup} \
       --removeStar \
