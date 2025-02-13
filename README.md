@@ -14,7 +14,7 @@ module load java/openjdk-11
 If you want to install nextflow, please check https://www.nextflow.io/.
 
 #### Singularity ####
-Singularity module is already loaded on our HPC cluster. We don't need to load it.
+Please look at Singularity documentation on how it install it on your system: https://docs.sylabs.io/guides/3.0/user-guide/installation.html
 
 #### Run CoCoRV pipeline ####
 Download the git repository using the following command:
@@ -33,6 +33,8 @@ The CoCoRV nextflow pipeline script, nextflow configuration file, and example ru
 * *CoCoRVPipeline.nf*: main nextflow script for CoCoRV pipeline.
 * *nextflow.config*: contains default configuration for running CoCoRV pipeline. Please update the "singularity.cacheDir" parameter inside "cluster_singularity" profile to specify a folder which can be used by Singularity to cache our pipeline's docker images (it can be any folder in your local cluster or local computer where you have full access).
 * *example folder*: contains run specific configuration files. You need to create a configuration file like "input.1KG.GRCh38.gnomAD.v4.1exomes.txt" or "input.1KG.GRCh38.gnomAD.v4.1genomes.txt" given in here and update it with case VCF file path and output folder path for your run.
+
+For detailed instructions on CoCoRV tool and it's parameters, please refer to the CoCoRV tool repository: https://bitbucket.org/Wenan/cocorv/src/master/
 
 #### GRCh37 using gnmoAD v2 exome data ####
 If you have GRCh37 data, you need to use this version. To run the CoCoRV pipeline for GRCh37 using gnomAD v2 exome data, an example run script "testGRCh37.gnomAD.v2exome_1KG_singularity.sh" is given. This test script uses the input configuration file given in here: "example/input.1KG.GRCh37.txt". Here we used 25 test samples from 1000 Genomes Project (build GRCh37) as case data.
@@ -54,6 +56,32 @@ To run CoCoRV using different inputs, you need to update "example/input.1KG.GRCh
 The test data used here is also available to download from Amazon s3 "[https://cocorv-1kg-grch38-data.s3.amazonaws.com/](https://cocorv-1kg-grch38-data.s3.amazonaws.com/)".
 The processed gnomAD v4 exome data used here is also available to download from Amazon s3 "[https://cocorv-resource-files.s3.amazonaws.com/gnomADv4.1exome/](https://cocorv-resource-files.s3.amazonaws.com/gnomADv4.1exome/)".
 The processed gnomAD v4 genome data used here is also available to download from Amazon s3 "[https://cocorv-resource-files.s3.amazonaws.com/gnomADv4.1genome/](https://cocorv-resource-files.s3.amazonaws.com/gnomADv4.1genome/)".
+
+#### Download gnomAD data using AWS CLI ####
+As this is a huge dataset, it is better to use Amazon AWS command line tool aws-cli to download the data. 
+
+Here is how you can install aws-cli:
+https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+After installing this, you can use "aws s3" command to list any s3 bucket folder, or download any folder or files from s3.
+https://docs.aws.amazon.com/cli/latest/reference/s3/
+
+Here are the s3 bucket paths of the gnomAD data:
+s3://cocorv-resource-files/gnomADv4.1exome/
+s3://cocorv-resource-files/gnomADv4.1genome/
+
+To download the data, you need to run commands like this:
+```bash
+cd /local-dir-path-where-you-want-download/
+aws s3 cp s3://cocorv-resource-files/gnomADv4.1exome/ . --recursive
+```
+You can check all resource files for CoCoRV using this command:
+```bash
+aws s3 ls s3://cocorv-resource-files/
+```
+
+#### TODO ####
+* Need to remove local path from profiles
 
 ### Contributors ###
 * Saima Sultana Tithi
