@@ -81,7 +81,7 @@ aws s3 ls s3://cocorv-resource-files/
 ```
 
 #### TODO ####
-* Need to remove local path from profiles
+* Move local path specific profiles to the input configuration file
 
 ### Contributors ###
 * Saima Sultana Tithi
