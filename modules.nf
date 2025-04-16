@@ -48,9 +48,10 @@ process normalizeQC {
 process annotate {
   tag "${chr}"
   publishDir "${params.outputRoot}/annotation", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v5'
+  container 'stithi/cocorv-nextflow-vep:v3'
 
-  memory { 20.GB * task.attempt }
+  cpus params.vepThreads
+  memory { 16.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
 
@@ -82,13 +83,14 @@ process annotate {
   bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
   if [[ ${params.addVEP} == "T" ]]; then
-    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${chr}.annotated.annovar.vcf.gz ${build} ${chr}.annotated ${params.reference} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${chr}.annotated.annovar.vcf.gz ${build} ${chr}.annotated ${params.refFASTA} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
   fi
   """
 }
  
 process skipAnnotation {
   tag "${chr}"
+  publishDir "${params.outputRoot}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-python:v5'
 
   input:
@@ -309,6 +311,7 @@ process CoCoRV {
       --AFMax ${params.AFMax} \
       --bed ${intersectBed} \
       --variantMissing ${params.variantMissing} \
+      --groupColumn ${params.groupColumn} \
       --variantGroup ${params.variantGroup} \
       --removeStar \
       --ACANConfig ${params.ACANConfig} \
@@ -317,7 +320,7 @@ process CoCoRV {
       --checkHighLDInControl \
       --pLDControl ${params.pLDControl} \
       --fullCaseGenotype \
-      --reference ${params.reference} \
+      --reference ${params.build} \
       --gnomADVersion ${params.gnomADVersion} \
       --controlAnnoGDSFile ${controlAnnotated} \
       --caseAnnoGDSFile ${caseAnnoGDS} \
@@ -411,6 +414,6 @@ process postCheck {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.build} ${params.caseSample}
+  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.build} ${params.caseSample} ${params.addVEP}
   """
 }

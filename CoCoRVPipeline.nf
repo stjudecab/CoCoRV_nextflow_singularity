@@ -45,16 +45,16 @@ workflow {
   chromChannel = Channel.fromList(Arrays.asList(chromosomes))
   normalizeQC(params.caseVCFPrefix, chromChannel, params.caseVCFSuffix)
 
-  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {
-    // annotate
-    if (params.caseAnnotatedVCFPrefix == "NA") {
-      annotate(normalizeQC.out, params.build)
-      annotateChannel = annotate.out
-    } else {
-      skipAnnotation(normalizeQC.out)
-      annotateChannel = skipAnnotation.out
-    }
+  // annotate
+  if (params.caseAnnotatedVCFPrefix == "NA") {
+    annotate(normalizeQC.out, params.build)
+    annotateChannel = annotate.out
+  } else {
+    skipAnnotation(normalizeQC.out)
+    annotateChannel = skipAnnotation.out
+  }
 
+  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {   
     // case genoypte vcf to gds
     caseGenotypeGDS(normalizeQC.out)
     caseGenotypeGDSChannel = caseGenotypeGDS.out

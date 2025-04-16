@@ -25,19 +25,13 @@ params {
   annovarFolder="/research/groups/cab/projects/Control/common/reference/annovar"
   CoCoRVFolder="/opt/cocorv/"
   // VEP
-  // VEP
-  vepFolder="/research/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep"
-  cache="/research/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep/cache_hg38"
-  lofteeFolder="/research/groups/cab/projects/Control/common/reference/VEP_v103/other_data/loftee/loftee"
-  lofteeDataFolder="/research/groups/cab/projects/Control/common/reference/VEP_v103/other_data/loftee/data_hg38"
-  caddSNV="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/CADD/hg38/whole_genome_SNVs.tsv.gz"
-  caddIndel="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/CADD/hg38/gnomad.genomes.r3.0.indel.tsv.gz"
+  caddSNV="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/CADD/hg38/v1.7/whole_genome_SNVs.tsv.gz"
+  caddIndel="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/CADD/hg38/v1.7/gnomad.genomes.r4.0.indel.tsv.gz"
   spliceAISNV="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/SpliceAI/spliceai_scores.raw.snv.hg38.vcf.gz"
   spliceAIIndel="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/SpliceAI/spliceai_scores.raw.indel.hg38.vcf.gz"
   AM="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/AlphaMissense"
   REVEL="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data/REVEL"
-  reference="/research/groups/cab/projects/Control/common/reference/Homo_sapiens/GRCh38_no_alt/FASTA/GRCh38_no_alt.fa"
-  perlThread="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
+  VEPCACHE="/research/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep/cache_hg38"
 
   // reference
   refFASTA="/research/rgs01/reference/public/genomes/Homo_sapiens/GRCh38/GRCh38_no_alt/GCA_000001405.15_GRCh38_no_alt_analysis_set.fa" 
@@ -46,13 +40,15 @@ params {
   chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
   // chrSet="21 22"
 
-  // CoCoRV setting
+  /// CoCoRV setting
   ACANConfig="/research/rgs01/home/clusterHome/wchen1/tools/CoCoRV_pipeline/CoCoRV_nextflow/example/stratified_config_gnomadV4.asj.txt"
   variantExclude="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2/r4.1.0/exomes/processed/failed/gnomAD41WGSExtraExcludeInCodingExcludeTAS2R46.txt.gz"
   AFMax=5e-4
   variantMissing=0.1
   variantGroup="annovar_pathogenic" 
   REVELThreshold=0.65
+
+  topK=50
 
 
 }
