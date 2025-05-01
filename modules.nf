@@ -131,7 +131,7 @@ process caseGenotypeGDS {
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
 
-  publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
+  //publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
 
   input: 
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
@@ -154,7 +154,7 @@ process caseAnnotationGDS {
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 1
 
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  //publishDir "${params.outputRoot}/annotation", mode: 'copy'
 
   input: 
     tuple val(chr), path(annotatedFile), path(indexFile)
@@ -324,8 +324,8 @@ process CoCoRV {
   if [[ "${params.CoCoRVOptions}" != "NA" ]]; then
     otherOptions="${params.CoCoRVOptions}"
   fi
-  if [[ "${params.groupFunctionConfig}" != "NA" ]]; then
-    otherOptions="\${otherOptions} --variantGroupCustom ${params.groupFunctionConfig}"
+  if [[ "${params.variantGroupCustom}" != "NA" ]]; then
+    otherOptions="\${otherOptions} --variantGroupCustom ${params.variantGroupCustom}"
   fi
   if [[ "${params.extraParamJason}" != "NA" ]]; then
     otherOptions="\${otherOptions} --extraParamJason ${params.extraParamJason}"
