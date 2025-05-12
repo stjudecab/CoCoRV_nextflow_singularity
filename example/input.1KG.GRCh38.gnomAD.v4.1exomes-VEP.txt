@@ -35,8 +35,9 @@ params {
 
   // tools
   annovarFolder="${annovarFolderDefined}"
-  CoCoRVFolder="/opt/cocorv/"
   // VEP
+  lofteeFolder="${vepPluginData}/loftee/loftee"
+  lofteeDataFolder="${vepPluginData}/loftee/data"
   caddSNV="${vepPluginData}/CADD/hg38/v1.7/whole_genome_SNVs.tsv.gz"
   caddIndel="${vepPluginData}/CADD/hg38/v1.7/gnomad.genomes-exomes.r4.0.indel.tsv.gz"
   spliceAISNV="${vepPluginData}/SpliceAI/spliceai_scores.raw.snv.hg38.vcf.gz"
