@@ -1,0 +1,89 @@
+{
+    "caseBed": {
+        "description": "(string) bed file containing good coverage positions from case vcf files where 90% samples have coverage >= 10"
+    },
+    "caseSample": {
+        "description": "(string) one column text file containing list of samples, one sample name per line"
+    },
+    "caseVCFFileList": {
+        "description": "(string) one column text file containing list of vcf file paths, one vcf file per line"
+    },
+    "gnomADVersion": {
+        "description": "(string) gnomAD version, available options are v2exome, v4exome, v4genome"
+    },
+    "caseAnnotatedVCFFolder": {
+        "description": "(string) case annotation vcf folder path"
+    },
+    "caseAnnotatedVCFPrefix": {
+        "description": "(string) prefix of case annotation vcf files before the chromosome number"
+    },
+    "caseAnnotatedVCFSuffix": {
+        "description": "(string) suffix of case annotation vcf files after the chromosome number"
+    },
+    "VCFAnno": {
+        "description": "(string) annotation options for annovar"
+    },
+    "toml": {
+        "description": "(string) annotation options for annovar"
+    },
+    "protocol": {
+        "description": "(string) annotation options for annovar, default: 'refGene,revel'"
+    },
+    "operation": {
+        "description": "(string) annotation options for annovar, default: 'g,f'"
+    },
+    "casePopulation": {
+        "description": "(string) file containing estimation of the population/ethnicity of case samples using gnomAD classifier, optional, if not specified nextflow app will estimate the population using gnomAD classifier"
+    },
+    "pLDControl": {
+        "description": "(number) the pvalue threshold to detect high LD variants in control"
+    },
+    "REVELThreshold": {
+        "description": "(number) the minimum REVEL score for pathogenic missense variants"
+    },
+    "variantInclude": {
+        "description": "(string) a one column file specifying the variants to be included, it will also include variants specified in variantExcludeFile"
+    },
+    "ACANConfig": {
+        "description": "(string) a file specifying the AC AN info ID and optional stratified ID for cases"
+    },
+    "AFMax": {
+        "description": "(number) the maximum of the alternate alleles frequency"
+    },
+    "variantMissing": {
+        "description": "(number) the maximum missingness allowed for a variant"
+    },
+    "variantGroup": {
+        "description": "(string) a specified variant group to use for test or a self defined function to define the variants of interest, see the function CoCoRV for more details"
+    },
+    "groupFunctionConfig": {
+        "description": "(string) an optional R file with functions or a tab separated two column text file defining the variants of interest, see README for examples"
+    },
+    "extraParamJason": {
+        "description": "(string) an optional JASON file to provide extra parameters to the custuomized file variantGroupCustom"
+    },
+    "annotationUsed": {
+        "description": "(string) a one column file without the header listing all required annotations used in variant filtering. AC AN annotations from ACANConfig will be added automatically"
+    },
+    "addVEP": {
+        "description": "(string) if VEP annotation will be used"
+    },
+    "VEPAnnotations": {
+        "description": "(string) VEP annotation parameters"
+    },
+    "batchSize": {
+        "description": "(number) batch size for CoCoRV module"
+    },
+    "cpus": {
+        "description": "(number) number of cpus for gds conversion module"
+    },
+    "CoCoRVOptions": {
+        "description": "(string) options for CoCoRV module"
+    },
+    "topK": {
+        "description": "top K genes for generating variant list"
+    },
+    "caseControl": {
+        "description": "cae or control for which top K genes need to be examined"
+    }
+}

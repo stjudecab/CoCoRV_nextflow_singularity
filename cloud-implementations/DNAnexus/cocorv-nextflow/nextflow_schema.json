@@ -1,0 +1,104 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/YOUR_PIPELINE/master/nextflow_schema.json",
+    "title": "Nextflow pipeline parameters",
+    "description": "This pipeline uses Nextflow and processes some kind of data. The JSON Schema was built using the nf-core pipeline schema builder.",
+    "type": "object",
+    "definitions": {
+        "inputs": {
+            "title": "Inputs",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "caseBed": {
+                    "type": "string",
+                    "description": "Bed file containing good coverage positions where 90% samples have coverage",
+                    "format": "file-path"
+                },
+                "caseVCFFolder": {
+                    "type": "string",
+                    "description": "Directory containing case vcf files, all vcf file names must be in '*.chr{chrNum}.vcf.gz' format, user should split the joint called vcf file chromosomewise and upload multiple vcf files, so that nextflow app can process multiple vcf files parallelly",
+                    "format": "directory-path"
+                },
+                "caseVCFPrefix": {
+                    "type": "string",
+                    "description": "prefix of case vcf files, filename prefix before chromosome number, all vcf file names must be in *.chr{chrNum}.vcf.gz format. The test VCF files given with the project are like samples.1KG.chr*.vcf.gz, so the prefix will be samples.1KG.chr"
+                },
+                "caseVCFSuffix": {
+                    "type": "string",
+                    "description": "suffix of case vcf files, filename suffix after chromosome number, all vcf file names must be in *.chr{chrNum}.vcf.gz format. The test VCF files given with the project are like samples.1KG.chr*.vcf.gz, so the suffix will be .vcf.gz"
+                },
+                "casePopulation": {
+                    "type": "string",
+                    "description": "File containing estimation of the population/ethnicity of case samples using gnomAD classifier, optional, if not specified nextflow app will estimate the population using gnomAD classifier",
+                    "format": "file-path"
+                },
+                "caseSample": {
+                    "type": "string",
+                    "description": "One column text file containing list of samples, one sample name per line",
+                    "format": "file-path"
+                },
+                "chrSet": {
+                    "type": "string",
+                    "description": "list of chromosomes you want to analyze, you can test only for chromosome 21 and 22, in that case, it will be '21 22'",
+                    "default": "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
+                },
+                "gnomADVersion": {
+                    "type": "string",
+                    "description": "gnomAD version, allowed values are 'v2exome', 'v4exome', 'v4genome' ('v2exome' use build GRCh37, 'v4exome' and 'v4genome' use build GRCh38)",
+                    "default": "v2exome"
+                },
+                "AFMax": {
+                    "type": "number",
+                    "description": "the maximum of the alternate alleles frequency",
+                    "default": 0.0001
+                },
+                "variantMissing": {
+                    "type": "number",
+                    "description": "the maximum missingness allowed for a variant",
+                    "default": 0.1 
+                },
+                "variantGroup": {
+                    "type": "string",
+                    "description": "predefined variant group to define the variants of interest, allowed values are 'annovar_pathogenic', 'annovar_function', 'annovar_LOF', 'annovar_missense', 'annovar_synonym', 'annovar_splicing'",
+                    "default": "annovar_pathogenic"
+                },
+                "REVELThreshold": {
+                    "type": "number",
+                    "description": "the minimum REVEL score for pathogenic missense variants",
+                    "default": 0.65
+                },
+                "cpus": {
+                    "type": "integer",
+                    "description": "number of cpus used for gds conversion",
+                    "default": 4
+                },
+                "resourceFiles": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Folder containing all gnomAD resource files"
+                },
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Local path to output directory",
+                    "default": "./results"
+                }
+            },
+            "required": [
+                "caseVCFFolder",
+                "caseVCFPrefix",
+                "caseVCFSuffix",
+                "caseSample",
+                "resourceFiles"
+            ]
+
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/inputs"
+        }
+    ]
+}

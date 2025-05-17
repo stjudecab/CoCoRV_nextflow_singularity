@@ -35,17 +35,17 @@ params {
   CoCoRVFolder="/opt/cocorv/"
   // VEP
   vepFolder=vepFolderDefined
-  cache="${vepFolder}/cache_hg38"
-  lofteeFolder="${vepPluginData}/LOFTEE/loftee"
-  lofteeDataFolder="${vepPluginData}/LOFTEE/loftee/hg38"
+  #lofteeFolder="${vepPluginData}/LOFTEE/loftee"
+  #lofteeDataFolder="${vepPluginData}/LOFTEE/loftee/hg38"
   caddSNV="${vepPluginData}/CADD/hg38/whole_genome_SNVs.tsv.gz"
   caddIndel="${vepPluginData}/CADD/hg38/gnomad.genomes.r3.0.indel.tsv.gz"
   spliceAISNV="${vepPluginData}/SpliceAI/spliceai_scores.raw.snv.hg38.vcf.gz"
   spliceAIIndel="${vepPluginData}/SpliceAI/spliceai_scores.raw.indel.hg38.vcf.gz"
   AM="${vepPluginData}/AlphaMissense/"
   REVEL="${vepPluginData}/REVEL"
+  VEPCACHE="${vepFolder}/cache_hg38"
   vepFASTA=referenceDefined
-  perlThread="${vepFolder}/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
+  #perlThread="${vepFolder}/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
 
   // reference
   refFASTA=referenceDefined 
@@ -62,6 +62,8 @@ params {
   variantMissing=0.1
   variantGroup="annovar_pathogenic" 
   REVELThreshold=0.65
+
+  topK=50
 
 
 }

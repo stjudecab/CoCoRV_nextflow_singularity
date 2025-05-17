@@ -2,7 +2,7 @@
 
 process coverageIntersect {
   tag "${caseBed}"
-  publishDir "${params.outputRoot}", mode: 'copy'
+  publishDir "${params.outdir}", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input:
@@ -21,8 +21,10 @@ process coverageIntersect {
 
 process normalizeQC {
   tag "${caseVCFPrefix}_${chr}"
-  publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
+  publishDir "${params.outdir}/vcf_vqsr_normalizedQC", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
+
+  disk '1024 GB'
 
   input:
     path(case_vcf_files)
@@ -50,7 +52,7 @@ process normalizeQC {
 
 process annotate {
   tag "${chr}"
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  publishDir "${params.outdir}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   memory { 20.GB * task.attempt }
@@ -124,11 +126,11 @@ process skipAnnotation {
 
 process caseGenotypeGDS {
   tag "${chr}"
-  publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
+  publishDir "${params.outdir}/vcf_vqsr_normalizedQC", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   cpus params.cpus
-  memory { 24.GB * task.attempt }
+  memory { 32.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
 
@@ -149,7 +151,7 @@ process caseGenotypeGDS {
 
 process caseAnnotationGDS {
   tag "${chr}"
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  publishDir "${params.outdir}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   memory { 20.GB * task.attempt }
@@ -173,7 +175,7 @@ process caseAnnotationGDS {
 
 process extractGnomADPositions {
   tag "${chr}"
-  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  publishDir "${params.outdir}/gnomADPosition", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input: 
@@ -192,7 +194,7 @@ process extractGnomADPositions {
 }
 
 process mergeExtractedPositions {
-  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  publishDir "${params.outdir}/gnomADPosition", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input: 
@@ -208,7 +210,7 @@ process mergeExtractedPositions {
 }
 
 process RFPrediction {
-  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  publishDir "${params.outdir}/gnomADPosition", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input: 
@@ -230,8 +232,7 @@ process RFPrediction {
 
 process CoCoRV {
   tag "${chr}"
-  publishDir "${params.outputRoot}/CoCoRV/byChr", mode: 'copy'
-  container 'stithi/cocorv-nextflow-r:v5'
+  container 'stithi/dnanexus-cocorv-nextflow-r:v2'
 
   memory { 64.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
@@ -318,7 +319,7 @@ process CoCoRV {
 }
 
 process mergeCoCoRVResults {
-  publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
+  publishDir "${params.outdir}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   input:
@@ -356,7 +357,7 @@ process mergeCoCoRVResults {
 }
 
 process QQPlotAndFDR {
-  publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
+  publishDir "${params.outdir}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   memory { 16.GB * task.attempt }
@@ -382,7 +383,7 @@ process QQPlotAndFDR {
 }
 
 process postCheck {
-  publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
+  publishDir "${params.outdir}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   memory { 10.GB * task.attempt }
@@ -420,9 +421,9 @@ workflow {
     controlBed = params.resourceFiles + "/hg19/gnomad_v2exome/coverage10x.bed.gz"
     controlGDS = params.resourceFiles + "/hg19/gnomad_v2exome"
     gnomADPCPosition = params.resourceFiles + "/hg19/gnomad_v2exome/hail_positions.GRCh37.chr.pos.tsv"
-    ACANConfig = params.resourceFiles + "/hg19/stratified_config_gnomad.txt"
-    variantExclude = params.resourceFiles + "/hg19/gnomAD.exclude.allow.segdup.lcr.v3.txt.gz"
-    highLDVariantFile = params.resourceFiles + "/hg19/full_vs_gnomAD.p0.05.OR1.ignoreEthnicityInLD.rds"
+    ACANConfig = params.Build_hg19.ACANConfig
+    variantExclude = params.Build_hg19.variantExclude
+    highLDVariantFile = params.Build_hg19.highLDVariantFile
     loadingPath = "/opt/cocorv/hail_hg19/gnomad.r2.1.pca_loadings.ht/"
     rfModelPath = "/opt/cocorv/hail_hg19/gnomad.r2.1.RF_fit.onnx"
     threshold = "0.9"
@@ -434,8 +435,8 @@ workflow {
     controlBed = params.resourceFiles + "/hg38/gnomADv4.1_exome/coverage10x.bed.gz"
     controlGDS = params.resourceFiles + "/hg38/gnomADv4.1_exome"
     gnomADPCPosition = params.resourceFiles + "/hg38/gnomADv4.1_genome/hail_positions.GRCh38.v4.chr.pos.tsv"
-    ACANConfig = params.resourceFiles + "/hg38/stratified_config_gnomadV4.asj.txt"
-    variantExclude = params.resourceFiles + "/hg38/gnomAD41WGSExtraExcludeInCodingExcludeTAS2R46.txt.gz"
+    ACANConfig = params.Build_hg38.ACANConfig
+    variantExclude = params.Build_hg38.variantExclude
     highLDVariantFile = "NA"
     loadingPath = "/opt/cocorv/hail_hg38/gnomad.v4.0.pca_loadings.ht/"
     rfModelPath = "/opt/cocorv/hail_hg38/gnomad.v4.0.RF_fit.onnx"
@@ -448,7 +449,7 @@ workflow {
     controlBed = params.resourceFiles + "/hg38/gnomADv4.1_genome/coverage10x.bed.gz"
     controlGDS = params.resourceFiles + "/hg38/gnomADv4.1_genome"
     gnomADPCPosition = params.resourceFiles + "/hg38/gnomADv4.1_genome/hail_positions.GRCh38.v4.chr.pos.tsv"
-    ACANConfig = params.resourceFiles + "/hg38/stratified_config_gnomadV4.asj.txt"
+    ACANConfig = params.Build_hg38.ACANConfig
     variantExclude = "NA"
     highLDVariantFile = "NA"
     loadingPath = "/opt/cocorv/hail_hg38/gnomad.v4.0.pca_loadings.ht/"
@@ -475,6 +476,7 @@ workflow {
   
   // annotate
   annotate(normalizeQC.out[0], normalizeQC.out[1], normalizeQC.out[2], reference, annovarFolder)
+
 
   // case genoypte vcf to gds
   caseGenotypeGDS(normalizeQC.out[0], normalizeQC.out[1], normalizeQC.out[2])
@@ -518,6 +520,6 @@ workflow {
   postCheck(mergeCoCoRVResults.out[0], params.topK, params.caseControl, reference, params.caseSample, 
     normalizeQC.out[1].collect(), normalizeQC.out[2].collect(), annotate.out[1].collect(), annotate.out[2].collect(), 
     CoCoRV.out[1].collect(), CoCoRV.out[2].collect())
-  
+
 }
 

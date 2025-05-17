@@ -56,6 +56,7 @@ workflow {
       annotateChannel = skipAnnotation.out
     }
 
+  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {   
     // case genoypte vcf to gds
     caseGenotypeGDS(normalizeQC.out)
     caseGenotypeGDSChannel = caseGenotypeGDS.out

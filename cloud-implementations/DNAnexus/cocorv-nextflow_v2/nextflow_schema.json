@@ -1,0 +1,91 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/YOUR_PIPELINE/master/nextflow_schema.json",
+    "title": "Nextflow pipeline parameters",
+    "description": "This pipeline uses Nextflow and processes some kind of data. The JSON Schema was built using the nf-core pipeline schema builder.",
+    "type": "object",
+    "definitions": {
+        "inputs": {
+            "title": "Inputs",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "caseBed": {
+                    "type": "string",
+                    "description": "Bed file containing good coverage positions where 90% samples have coverage",
+                    "format": "file-path"
+                },
+                "casePopulation": {
+                    "type": "string",
+                    "description": "File containing estimation of the population/ethnicity of case samples using gnomAD classifier, optional, if not specified nextflow app will estimate the population using gnomAD classifier",
+                    "format": "file-path"
+                },
+                "caseSample": {
+                    "type": "string",
+                    "description": "One column text file containing list of samples, one sample name per line",
+                    "format": "file-path"
+                },
+                "caseVCFFileList": {
+                    "type": "string",
+                    "description": "One column text file containing list of vcf files you want to analyze",
+                    "format": "file-path"
+                },
+                "gnomADVersion": {
+                    "type": "string",
+                    "description": "gnomAD version, allowed values are 'v2exome', 'v4exome', 'v4genome' ('v2exome' use build GRCh37, 'v4exome' and 'v4genome' use build GRCh38)",
+                    "default": "v2exome"
+                },
+                "AFMax": {
+                    "type": "number",
+                    "description": "the maximum of the alternate alleles frequency",
+                    "default": 0.0001
+                },
+                "variantMissing": {
+                    "type": "number",
+                    "description": "the maximum missingness allowed for a variant",
+                    "default": 0.1 
+                },
+                "variantGroup": {
+                    "type": "string",
+                    "description": "predefined variant group to define the variants of interest, allowed values are 'annovar_pathogenic', 'annovar_function', 'annovar_LOF', 'annovar_missense', 'annovar_synonym', 'annovar_splicing'",
+                    "default": "annovar_pathogenic"
+                },
+                "REVELThreshold": {
+                    "type": "number",
+                    "description": "the minimum REVEL score for pathogenic missense variants",
+                    "default": 0.65
+                },
+                "cpus": {
+                    "type": "integer",
+                    "description": "number of cpus used for gds conversion",
+                    "default": 4
+                },
+                "resourceFiles": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Folder containing all gnomAD resource files"
+                },
+                "outdir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Local path to output directory",
+                    "default": "./results"
+                }
+            },
+            "required": [
+                "caseVCFFolder",
+                "caseVCFPrefix",
+                "caseVCFSuffix",
+                "caseSample",
+                "resourceFiles"
+            ]
+
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/inputs"
+        }
+    ]
+}

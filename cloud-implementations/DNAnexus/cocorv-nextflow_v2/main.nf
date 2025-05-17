@@ -2,7 +2,7 @@
 
 process coverageIntersect {
   tag "${caseBed}"
-  publishDir "${params.outputRoot}", mode: 'copy'
+  publishDir "${params.outdir}", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input:
@@ -20,37 +20,29 @@ process coverageIntersect {
 }
 
 process normalizeQC {
-  tag "${caseVCFPrefix}_${chr}"
-  publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python-cloud:v2'
+  //tag "${caseVCFPrefix}_${chr}"
+  publishDir "${params.outdir}/vcf_vqsr_normalizedQC", mode: 'copy'
+  container 'stithi/dnanexus-cocorv-nextflow-python:v3'
+
+  disk '200 GB'
 
   input:
-    path(case_vcf_files)
-    val caseVCFPrefix
-    val chr
-    val caseVCFSuffix
-    path(ref_fasta)
+    path case_vcf_file
+    path refFASTA
 
   output:
-    val("${chr}")
-    path("${chr}.biallelic.leftnorm.ABCheck.vcf.gz")
-    path("${chr}.biallelic.leftnorm.ABCheck.vcf.gz.tbi")
+    path("*.biallelic.leftnorm.ABCheck.vcf.gz")
+    path("*.biallelic.leftnorm.ABCheck.vcf.gz.tbi")
 
   script:
-  if (chr == "NA") {
-    vcfFile=caseVCFPrefix + caseVCFSuffix
-  } else {
-    vcfFile=caseVCFPrefix + chr + caseVCFSuffix
-  }
   """
-  outputPrefix=${chr}
-  bash /opt/cocorv/utilities/vcfQCAndNormalize.sh ${vcfFile} \${outputPrefix} ${ref_fasta}
+  bash /opt/cocorv/utilities/vcfQCAndNormalize_aws.sh ${case_vcf_file} ${refFASTA}
   """
 }
 
 process annotate {
   tag "${chr}"
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  publishDir "${params.outdir}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   memory { 20.GB * task.attempt }
@@ -58,7 +50,6 @@ process annotate {
   maxRetries 5
 
   input:
-    val(chr)
     path(normalizedQCedVCFFile)
     path(indexFile)
     val reference
@@ -70,6 +61,7 @@ process annotate {
     path("${chr}.annotated.vcf.gz.tbi")
 
   script:
+  chr = normalizedQCedVCFFile.simpleName
   refbuild = null
   if (reference == "GRCh37") {
     refbuild="hg19"  
@@ -88,10 +80,6 @@ process annotate {
   bash /opt/cocorv/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
   if [[ ${params.addVEP} == "T" ]]; then
-    module load perl/5.28.1
-    module load htslib/1.10.2
-    module load bcftools/1.15.1
-    module load samtools/1.10
     bash /opt/cocorv/utilities/annotateVEPWithOptions.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.reference} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
   fi
   """
@@ -102,7 +90,6 @@ process skipAnnotation {
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input:
-    val(chr)
     path(normalizedQCedVCFFile)
     path(indexFile)
 
@@ -112,6 +99,7 @@ process skipAnnotation {
     path("${chr}.annotated.vcf.gz.tbi")
 
   script:
+  chr = normalizedQCedVCFFile.simpleName
   if (chr == "NA") {
     annotated=params.caseAnnotatedVCFPrefix+params.caseAnnotatedVCFSuffix
   } else {
@@ -124,16 +112,15 @@ process skipAnnotation {
 
 process caseGenotypeGDS {
   tag "${chr}"
-  publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
+  publishDir "${params.outdir}/vcf_vqsr_normalizedQC", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   cpus params.cpus
-  memory { 24.GB * task.attempt }
+  memory { 32.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
 
   input: 
-    val(chr)
     path(normalizedQCedVCFFile)
     path(indexFile)
 
@@ -142,6 +129,7 @@ process caseGenotypeGDS {
           path("${chr}.biallelic.leftnorm.ABCheck.vcf.gz.gds")
 
   script:
+  chr = normalizedQCedVCFFile.simpleName
   """
   Rscript /opt/cocorv/utilities/vcf2gds.R ${normalizedQCedVCFFile} ${chr}.biallelic.leftnorm.ABCheck.vcf.gz.gds ${params.cpus}
   """
@@ -149,7 +137,7 @@ process caseGenotypeGDS {
 
 process caseAnnotationGDS {
   tag "${chr}"
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  publishDir "${params.outdir}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   memory { 20.GB * task.attempt }
@@ -173,11 +161,10 @@ process caseAnnotationGDS {
 
 process extractGnomADPositions {
   tag "${chr}"
-  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  publishDir "${params.outdir}/gnomADPosition", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input: 
-    val(chr)
     path(normalizedQCedVCFFile)
     path(indexFile)
     path(gnomADPCPosition)
@@ -186,13 +173,14 @@ process extractGnomADPositions {
     path "${chr}.extracted.vcf.gz"
 
   script:
+  chr = normalizedQCedVCFFile.simpleName
   """
   bcftools view -R ${gnomADPCPosition} -Oz -o ${chr}.extracted.vcf.gz ${normalizedQCedVCFFile}
   """
 }
 
 process mergeExtractedPositions {
-  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  publishDir "${params.outdir}/gnomADPosition", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
 
   input: 
@@ -208,8 +196,12 @@ process mergeExtractedPositions {
 }
 
 process RFPrediction {
-  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  publishDir "${params.outdir}/gnomADPosition", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
+
+  memory { 32.GB * task.attempt }
+  errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
+  maxRetries 1
 
   input: 
     path VCFForPrediction
@@ -230,8 +222,7 @@ process RFPrediction {
 
 process CoCoRV {
   tag "${chr}"
-  publishDir "${params.outputRoot}/CoCoRV/byChr", mode: 'copy'
-  container 'stithi/cocorv-nextflow-r:v5'
+  container 'stithi/dnanexus-cocorv-nextflow-r:v2'
 
   memory { 64.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
@@ -318,7 +309,7 @@ process CoCoRV {
 }
 
 process mergeCoCoRVResults {
-  publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
+  publishDir "${params.outdir}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   input:
@@ -356,7 +347,7 @@ process mergeCoCoRVResults {
 }
 
 process QQPlotAndFDR {
-  publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
+  publishDir "${params.outdir}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-r:v5'
 
   memory { 16.GB * task.attempt }
@@ -382,10 +373,11 @@ process QQPlotAndFDR {
 }
 
 process postCheck {
-  publishDir "${params.outputRoot}/CoCoRV", mode: 'copy'
+  publishDir "${params.outdir}/CoCoRV", mode: 'copy'
   container 'stithi/cocorv-nextflow-python-cloud:v2'
+  disk '500 GB'
 
-  memory { 10.GB * task.attempt }
+  memory { 16.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 1
 
@@ -420,9 +412,9 @@ workflow {
     controlBed = params.resourceFiles + "/hg19/gnomad_v2exome/coverage10x.bed.gz"
     controlGDS = params.resourceFiles + "/hg19/gnomad_v2exome"
     gnomADPCPosition = params.resourceFiles + "/hg19/gnomad_v2exome/hail_positions.GRCh37.chr.pos.tsv"
-    ACANConfig = params.resourceFiles + "/hg19/stratified_config_gnomad.txt"
-    variantExclude = params.resourceFiles + "/hg19/gnomAD.exclude.allow.segdup.lcr.v3.txt.gz"
-    highLDVariantFile = params.resourceFiles + "/hg19/full_vs_gnomAD.p0.05.OR1.ignoreEthnicityInLD.rds"
+    ACANConfig = params.Build_hg19.ACANConfig
+    variantExclude = params.Build_hg19.variantExclude
+    highLDVariantFile = params.Build_hg19.highLDVariantFile
     loadingPath = "/opt/cocorv/hail_hg19/gnomad.r2.1.pca_loadings.ht/"
     rfModelPath = "/opt/cocorv/hail_hg19/gnomad.r2.1.RF_fit.onnx"
     threshold = "0.9"
@@ -434,8 +426,8 @@ workflow {
     controlBed = params.resourceFiles + "/hg38/gnomADv4.1_exome/coverage10x.bed.gz"
     controlGDS = params.resourceFiles + "/hg38/gnomADv4.1_exome"
     gnomADPCPosition = params.resourceFiles + "/hg38/gnomADv4.1_genome/hail_positions.GRCh38.v4.chr.pos.tsv"
-    ACANConfig = params.resourceFiles + "/hg38/stratified_config_gnomadV4.asj.txt"
-    variantExclude = params.resourceFiles + "/hg38/gnomAD41WGSExtraExcludeInCodingExcludeTAS2R46.txt.gz"
+    ACANConfig = params.Build_hg38.ACANConfig
+    variantExclude = params.Build_hg38.variantExclude
     highLDVariantFile = "NA"
     loadingPath = "/opt/cocorv/hail_hg38/gnomad.v4.0.pca_loadings.ht/"
     rfModelPath = "/opt/cocorv/hail_hg38/gnomad.v4.0.RF_fit.onnx"
@@ -448,7 +440,7 @@ workflow {
     controlBed = params.resourceFiles + "/hg38/gnomADv4.1_genome/coverage10x.bed.gz"
     controlGDS = params.resourceFiles + "/hg38/gnomADv4.1_genome"
     gnomADPCPosition = params.resourceFiles + "/hg38/gnomADv4.1_genome/hail_positions.GRCh38.v4.chr.pos.tsv"
-    ACANConfig = params.resourceFiles + "/hg38/stratified_config_gnomadV4.asj.txt"
+    ACANConfig = params.Build_hg38.ACANConfig
     variantExclude = "NA"
     highLDVariantFile = "NA"
     loadingPath = "/opt/cocorv/hail_hg38/gnomad.v4.0.pca_loadings.ht/"
@@ -466,18 +458,19 @@ workflow {
   }
 
   // normalize and QC
-  case_vcf_ch = Channel
-        .fromPath(params.caseVCFFolder + "/" + params.caseVCFPrefix + "*" + params.caseVCFSuffix)
-
-  chromosomes = params.chrSet.split("\\s+")
-  chromChannel = Channel.fromList(Arrays.asList(chromosomes))
-  normalizeQC(case_vcf_ch.collect(), params.caseVCFPrefix, chromChannel, params.caseVCFSuffix, refFasta)
+  case_vcf_ch = Channel            
+			            .fromPath(params.caseVCFFileList)               
+                  .splitText()
+                  .map{it.replaceFirst(/\n/,"")}
+                  .map{ file(it) }   //map the file path string into file object, then can extract the file information. 
+                  
+  normalizeQC(case_vcf_ch, refFasta)
   
   // annotate
-  annotate(normalizeQC.out[0], normalizeQC.out[1], normalizeQC.out[2], reference, annovarFolder)
+  annotate(normalizeQC.out[0], normalizeQC.out[1], reference, annovarFolder)
 
   // case genoypte vcf to gds
-  caseGenotypeGDS(normalizeQC.out[0], normalizeQC.out[1], normalizeQC.out[2])
+  caseGenotypeGDS(normalizeQC.out[0], normalizeQC.out[1])
 
   // case annotation to gds
   caseAnnotationGDS(annotate.out[0], annotate.out[1], annotate.out[2])
@@ -485,7 +478,7 @@ workflow {
   // run gnomAD based population prediction
   if (params.casePopulation == null) {
     // extract gnomAD positions
-    extractGnomADPositions(normalizeQC.out[0], normalizeQC.out[1], normalizeQC.out[2], gnomADPCPosition)
+    extractGnomADPositions(normalizeQC.out[0], normalizeQC.out[1], gnomADPCPosition)
 
     // merge extracted gnomAD positions
     mergeExtractedPositions(extractGnomADPositions.out.collect())
@@ -516,8 +509,8 @@ workflow {
   // QQ plot and FDR
   QQPlotAndFDR(mergeCoCoRVResults.out[0], mergeCoCoRVResults.out[1], mergeCoCoRVResults.out[2])
   postCheck(mergeCoCoRVResults.out[0], params.topK, params.caseControl, reference, params.caseSample, 
-    normalizeQC.out[1].collect(), normalizeQC.out[2].collect(), annotate.out[1].collect(), annotate.out[2].collect(), 
+    normalizeQC.out[0].collect(), normalizeQC.out[1].collect(), annotate.out[1].collect(), annotate.out[2].collect(), 
     CoCoRV.out[1].collect(), CoCoRV.out[2].collect())
-  
+
 }
 

@@ -1,0 +1,5 @@
+module load python/3.11.0
+dx --version
+dx v0.387.0
+
+dx build -a --nextflow cocorv-nextflow --destination CoCoRV_dev:/applets/nextflow-workflows/cocorv-nextflow_v4

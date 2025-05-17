@@ -1,5 +1,5 @@
 app_content:
-  code_package: 672bad1daddcb32e1bacf83d
+  code_package: 678fe14909c1a319b8eea3b8
   entrypoint: main.nf
 class: nextflow
 cwlVersion: None
@@ -7,8 +7,7 @@ doc: A cloud based pipeline for rare variant analysis using public summary count
   for prioritizing disease predisposition genes in rare disease studies.
 inputs:
 - doc: resource files containing reference fasta and gnomAD files, please select the
-    "resource_files/hg19" directory for GRCh37 build or "resource_files/hg38" directory
-    for GRCh38 build from "Files" section
+    "cocorv-resource-files" directory from the "Files" section
   id: resourceFiles
   inputBinding:
     prefix: --resourceFiles
@@ -32,14 +31,16 @@ inputs:
   type:
   - Directory
 - doc: prefix of case vcf files, filename prefix before chromosome number, all vcf
-    file names must be in "*.chr{chrNum}.vcf.gz" format
+    file names must be in "*.chr{chrNum}.vcf.gz" format. The test VCF files given
+    with the project are like "samples.1KG.chr*.vcf.gz", so the prefix will be "samples.1KG.chr"
   id: caseVCFPrefix
   inputBinding:
     prefix: --caseVCFPrefix
   type:
   - string
 - doc: suffix of case vcf files, filename suffix after chromosome number, all vcf
-    file names must be in "*.chr{chrNum}.vcf.gz" format
+    file names must be in "*.chr{chrNum}.vcf.gz" format. The test VCF files given
+    with the project are like "samples.1KG.chr*.vcf.gz", so the suffix will be ".vcf.gz"
   id: caseVCFSuffix
   inputBinding:
     prefix: --caseVCFSuffix
@@ -54,6 +55,7 @@ inputs:
   sbg:toolDefaultValue: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
   type:
   - string
+  - 'null'
 - doc: file containing estimation of the population/ethnicity of case samples using
     gnomAD classifier, optional, if not specified nextflow app will estimate the population
     using gnomAD classifier
@@ -63,24 +65,23 @@ inputs:
   type:
   - File
   - 'null'
-- doc: one column text file containing list of samples, one sample name per line
+- doc: one column text file containing list of samples, one sample ID per line
   id: caseSample
   inputBinding:
     prefix: --caseSample
   type:
   - File
 - default: v2exome
-  doc: gnomAD version, allowed values are "v2exome", "v4exome", "v4genome" ("v2exome"
-    use build GRCh37, "v4exome" and "v4genome" use build GRCh38)
+  doc: gnomAD version, allowed values are "v2exome", "v4exome", "v4genome" (for GRCh37
+    data use "v2exome", for GRCh38, use "v4exome" or "v4genome")
   id: gnomADVersion
   inputBinding:
     prefix: --gnomADVersion
   sbg:toolDefaultValue: v2exome
   type:
   - string
-  - 'null'
 - default: 0.0001
-  doc: the maximum of the alternate alleles frequency
+  doc: the maximum of the alternate alleles frequency allowed for filtering variants
   id: AFMax
   inputBinding:
     prefix: --AFMax
@@ -118,7 +119,7 @@ inputs:
   - float
   - 'null'
 - default: 4
-  doc: number of cpus for gds conversion (for caseGenotypeGDS module)
+  doc: number of cpus used for gds conversion
   id: cpus
   inputBinding:
     prefix: --cpus
@@ -126,11 +127,19 @@ inputs:
   type:
   - int
   - 'null'
+- default: test-output
+  doc: output directory name, default value "test-output"
+  id: outputRoot
+  inputBinding:
+    prefix: --outputRoot
+  sbg:toolDefaultValue: test-output
+  type:
+  - string
 outputs:
 - doc: The output directory specified in publishDir in the workflow.
   id: output_dir
   outputBinding:
-    glob: outputs
+    glob: $(inputs.outputRoot)
   type: Directory
 requirements:
 - class: InlineJavascriptRequirement

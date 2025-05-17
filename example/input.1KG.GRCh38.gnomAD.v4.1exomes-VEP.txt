@@ -1,0 +1,71 @@
+def controlRoot="/research/groups/cab/projects/Synthetic_Control/common/WGS/Raw/rare_variant_analysis/gnomADAnalysis2"
+
+def vepFolderDefined="/research/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep"
+
+def vepPluginData="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/other_data"
+
+def annovarFolderDefined="/research/groups/cab/projects/Control/common/reference/annovar"
+
+def referenceDefined="/research/rgs01/reference/public/genomes/Homo_sapiens/GRCh38/GRCh38_no_alt/GCA_000001405.15_GRCh38_no_alt_analysis_set.fa"
+
+def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh38-gnomADv4.1exome-output"
+
+params {
+  // gnomAD V4.1 files
+  controlCountPrefix="${controlRoot}/r4.1.0/exomes/processed/gnomad.exomes.v4.1.sites.chr"
+  controlCountSuffix=".vcf.bgz.gds"
+  controlAnnoPrefix="${controlRoot}/r4.1.0/exomes/processed/annotate/chr"
+  controlAnnoSuffix=".annovar.vep.vcf.gz.gds"
+  controlBed="${controlRoot}/r4.1.0/exomes/processed/coverage10x.bed.gz"
+
+  // gnomAD PC and population data from v4.1
+  gnomADPCPosition="${controlRoot}/r4/ancestry/hail_positions.GRCh38.v4.chr.pos.tsv"
+  loadingPath="${controlRoot}/r4/ancestry/gnomad.v4.0.pca_loadings.ht"
+  rfModelPath="${controlRoot}/r4/ancestry/gnomad.v4.0.RF_fit.onnx"
+  threshold=0.75 // the threshold used to assign populations/ethnicities. 0.9 is used in gnomAD v2, 0.75 is used in gnomAD v3. For simplicity, 0.75 is used for gnomAD v4, even though different thresholds for different populations might be better. If the probability is below the threshold, other will be assigned.
+
+  // case files
+  caseBed="NA"
+  caseVCFPrefix="/research/groups/cab/projects/Control/common/reference/1000G/GRCh38/high_coverage/CoCoRV-test-GRCh38/gatk/jointVCF/CoCoRV-GRCh38-1KG/CoCoRV-GRCh38-1KG.GATK.chr"
+  caseVCFSuffix=".vcf.gz"
+  caseSample="/research/groups/cab/projects/Control/common/reference/1000G/GRCh38/high_coverage/CoCoRV-test-GRCh38/23_samples.txt"
+
+  // output folder
+  outputRoot="${outputFolder}"
+
+  // tools
+  annovarFolder="${annovarFolderDefined}"
+  CoCoRVFolder="/opt/cocorv/"
+  // VEP
+  caddSNV="${vepPluginData}/CADD/hg38/v1.7/whole_genome_SNVs.tsv.gz"
+  caddIndel="${vepPluginData}/CADD/hg38/v1.7/gnomad.genomes-exomes.r4.0.indel.tsv.gz"
+  spliceAISNV="${vepPluginData}/SpliceAI/spliceai_scores.raw.snv.hg38.vcf.gz"
+  spliceAIIndel="${vepPluginData}/SpliceAI/spliceai_scores.raw.indel.hg38.vcf.gz"
+  AM="${vepPluginData}/AlphaMissense"
+  REVEL="${vepPluginData}/REVEL"
+  VEPCACHE="${vepFolderDefined}/cache_hg38"
+
+  // reference
+  refFASTA="${referenceDefined}" 
+  build="GRCh38" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
+  gnomADVersion="v4exome"
+  chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
+  // chrSet="21 22"
+
+  // CoCoRV setting
+  ACANConfig="${controlRoot}/r4.1.0/stratified_config_gnomadV4.asj.txt"
+  variantExclude="${controlRoot}/r4.1.0/exomes/processed/failed/gnomAD41WGSExtraExcludeInCodingExcludeTAS2R46.txt.gz"
+  AFMax=5e-4
+  variantMissing=0.1
+  groupFunctionConfig="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity_test_vep/variantGroupVEP.txt"
+  variantGroup="vep_lof"
+  //variantGroup="vep_lof_missense_am" 
+  //variantGroup="vep_lof_missense_revel0.65" 
+  groupColumn="SYMBOL"
+  REVELThreshold=0.65
+
+  topK=50
+  addVEP="T"
+
+
+}

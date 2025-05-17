@@ -48,9 +48,10 @@ process normalizeQC {
 process annotate {
   tag "${chr}"
   publishDir "${params.outputRoot}/annotation", mode: 'copy'
-  container 'stithi/cocorv-nextflow-python:v5'
+  container 'stithi/cocorv-nextflow-vep:v3'
 
-  memory { 20.GB * task.attempt }
+  cpus params.vepThreads
+  memory { 16.GB * task.attempt }
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
 
@@ -80,26 +81,24 @@ process annotate {
   fi
 
   if [[ ${params.annotationTool} == "VEP" ]]; then
-    module load perl/5.28.1
-    module load htslib/1.10.2
-    module load bcftools/1.15.1
-    module load samtools/1.10
-
     outputPrefix="${chr}.annotated"
-    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${normalizedQCedVCFFile} ${reference} ${chr}.annotated ${params.vepFASTA} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${normalizedQCedVCFFile} ${reference} ${chr}.annotated ${params.reference} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
   fi
   
   if [[ ${params.annotationTool} == "ANNOVAR_VEP" ]]; then
     outputPrefix="${chr}.annotated.annovar"
     bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
-    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.vepFASTA} ${params.vepFolder} ${params.cache} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.perlThread} ${params.AM} ${params.REVEL} 1 ${params.VEPAnnotations}
-  fi
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.reference} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
+
+   fi
+
   """
 }
  
 process skipAnnotation {
   tag "${chr}"
+  publishDir "${params.outputRoot}/annotation", mode: 'copy'
   container 'stithi/cocorv-nextflow-python:v5'
 
   input:
@@ -349,6 +348,7 @@ process CoCoRV {
       --AFMax ${params.AFMax} \
       --bed \${finalBed} \
       --variantMissing ${params.variantMissing} \
+      --groupColumn ${params.groupColumn} \
       --variantGroup ${params.variantGroup} \
       --removeStar \
       --ACANConfig ${params.ACANConfig} \
@@ -357,7 +357,7 @@ process CoCoRV {
       --checkHighLDInControl \
       --pLDControl ${params.pLDControl} \
       --fullCaseGenotype \
-      --reference ${params.reference} \
+      --reference ${params.build} \
       --gnomADVersion ${params.gnomADVersion} \
       --controlAnnoGDSFile ${controlAnnotated} \
       --caseAnnoGDSFile ${caseAnnoGDS} \
@@ -451,6 +451,6 @@ process postCheck {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.reference} ${params.caseSample}
+  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.reference} ${params.caseSample} ${params.addVEP}
   """
 }
