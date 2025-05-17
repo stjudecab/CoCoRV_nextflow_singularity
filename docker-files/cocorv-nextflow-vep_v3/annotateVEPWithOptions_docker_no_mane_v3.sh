@@ -1,7 +1,7 @@
 set -euo pipefail
 
 main() {
-# usage: bash <script> ${vcfFile} ${ASSEMBLY} ${outputPrefix} ${REF} ${LOFTEEDIR} ${LOFTEEDATADIR} ${CADDSNVS} ${CADDINDELS} ${SPLICEAISNVS} ${SPLICEAIINDELS} ${AlphaMissenseDIR} ${REVELDIR} ${nThreads} ${annotations}
+# usage: bash <script> ${vcfFile} ${ASSEMBLY} ${outputPrefix} ${REF} ${LOFTEEDIR} ${LOFTEEDATADIR} ${CADDSNVS} ${CADDINDELS} ${SPLICEAISNVS} ${SPLICEAIINDELS} ${AlphaMissenseDIR} ${LOFTEEDIR} ${REVELDIR} ${nThreads} ${annotations} ${VEPCACHE}
 
 
 ### HANDLE INPUTS
@@ -14,18 +14,19 @@ CADDINDELS=$6
 SPLICEAISNVS=$7
 SPLICEAIINDELS=$8
 AlphaMissenseDIR=$9
-REVELDIR=${10}
-nThreads=${11}
-annotations=${12}
-VEPCACHE=${13}
+LOFTEEDIR=${10}
+REVELDIR=${11}
+nThreads=${12}
+annotations=${13}
+VEPCACHE=${14}
 
 ### SET VARIABLES
 if [ $ASSEMBLY == 'GRCh38' ]; then
-  LOFTEE="LoF,loftee_path:${VEPCACHE}/Plugins,human_ancestor_fa:/${VEPCACHE}/Plugins/data/human_ancestor.fa.gz,conservation_file:/${VEPCACHE}/Plugins/data/loftee.sql,gerp_bigwig:/${VEPCACHE}/Plugins/data/gerp_conservation_scores.homo_sapiens.GRCh38.bw --dir_plugins ${VEPCACHE}/Plugins"
+  LOFTEE="LoF,loftee_path:${LOFTEEDIR},human_ancestor_fa:/${LOFTEEDIR}/human_ancestor.GRCh38.fa.gz,conservation_file:/${LOFTEEDIR}/loftee.sql,gerp_bigwig:/${LOFTEEDIR}/gerp_conservation_scores.homo_sapiens.GRCh38.bw --dir_plugins ${LOFTEEDIR}"
   AlphaMissense="AlphaMissense,file=${AlphaMissenseDIR}/hg38/AlphaMissense_hg38.tsv.gz"
   REVEL="REVEL,file=${REVELDIR}/new_tabbed_revel_grch38.tsv.gz,no_match=1"
 elif [ $ASSEMBLY == 'GRCh37' ]; then
-    LOFTEE="LoF,loftee_path:${VEPCACHE}/Plugins,human_ancestor_fa:${VEPCACHE}/Plugins/data/human_ancestor.fa.gz,conservation_file:${VEPCACHE}/Plugins/data/phylocsf_gerp.sql,gerp_file:${VEPCACHE}/Plugins/data/GERP_scores.final.sorted.txt.gz"
+    LOFTEE="LoF,loftee_path:${LOFTEEDIR},human_ancestor_fa:${LOFTEEDIR}/human_ancestor.fa.gz,conservation_file:${LOFTEEDIR}/phylocsf_gerp.sql,gerp_file:${LOFTEEDIR}/GERP_scores.final.sorted.txt.gz"
   AlphaMissense="AlphaMissense,file=${AlphaMissenseDIR}/hg19/AlphaMissense_hg19.tsv.gz"
   REVEL="REVEL,file=${REVELDIR}/new_tabbed_revel.tsv.gz,no_match=1"
 else

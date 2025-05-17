@@ -10,7 +10,7 @@ Usage:
     nextflow run CoCoRVPipeline.nf -c inputConfig -profile profileName
 Input:
     * -c: Path of input config file.
-    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity_lsf"
+    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity_lsf", "cluster_apptainer_slurm"
 """
 
 // Import modules
@@ -55,8 +55,7 @@ workflow {
       skipAnnotation(normalizeQC.out)
       annotateChannel = skipAnnotation.out
     }
-
-  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {   
+    
     // case genoypte vcf to gds
     caseGenotypeGDS(normalizeQC.out)
     caseGenotypeGDSChannel = caseGenotypeGDS.out

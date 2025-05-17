@@ -1,8 +1,9 @@
+def pipelineFolder="/research/bsi/projects/staff_analysis/m301801/tools/cocorv_pipeline/CoCoRV_nextflow_singularity"
 def controlRoot="/research/bsi/projects/staff_analysis/m301801/tools/cocorv_pipeline/gnomAD/v4.1.0"
 def oneKGRoot="/research/bsi/projects/staff_analysis/m301801/tools/cocorv_pipeline/cocorv-1kg-grch38-data"
 def outputRootDefined="/research/bsi/projects/staff_analysis/m301801/tools/cocorv_pipeline/CoCoRV-1KG-GRCh38-gnomADv4.1exome-output"
 def vepFolderDefined="/research/bsi/projects/staff_analysis/m301801/tools/cocorv_pipeline/ensembl-vep"
-def vepPluginData="/research/bsi/projects/PI/tertiary/Couch_Fergus_coucf/s306689.ProjectGeneration/Tapestry/ref/VEP_plugins"
+def vepPluginData="/research/bsi/projects/PI/tertiary/Couch_Fergus_coucf/s306689.ProjectGeneration/ref/VEP_plugins"
 def annovarFolderDefined="/research/bsi/projects/staff_analysis/m301801/tools/annovar/annovar_20191024"
 def referenceDefined="/research/bsi/projects/staff_analysis/m301801/simplexo/data/AoURef/Homo_sapiens_assembly38.fasta"
 
@@ -35,8 +36,8 @@ params {
   CoCoRVFolder="/opt/cocorv/"
   // VEP
   vepFolder=vepFolderDefined
-  #lofteeFolder="${vepPluginData}/LOFTEE/loftee"
-  #lofteeDataFolder="${vepPluginData}/LOFTEE/loftee/hg38"
+  // lofteeFolder="${vepPluginData}/LOFTEE/loftee"
+  // lofteeDataFolder="${vepPluginData}/LOFTEE/loftee/hg38"
   caddSNV="${vepPluginData}/CADD/hg38/whole_genome_SNVs.tsv.gz"
   caddIndel="${vepPluginData}/CADD/hg38/gnomad.genomes.r3.0.indel.tsv.gz"
   spliceAISNV="${vepPluginData}/SpliceAI/spliceai_scores.raw.snv.hg38.vcf.gz"
@@ -45,7 +46,7 @@ params {
   REVEL="${vepPluginData}/REVEL"
   VEPCACHE="${vepFolder}/cache_hg38"
   vepFASTA=referenceDefined
-  #perlThread="${vepFolder}/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
+  // perlThread="${vepFolder}/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
 
   // reference
   refFASTA=referenceDefined 
