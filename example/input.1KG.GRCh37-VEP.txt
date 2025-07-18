@@ -8,7 +8,7 @@ def annovarFolderDefined="/research/groups/cab/projects/Control/common/reference
 
 def referenceDefined="/research/rgs01/applications/hpcf/authorized_apps/cab/Automation/REF/Homo_sapiens/NCBI/GRCh37-lite/bwa-index/GRCh37-lite_wochr/GRCh37-lite.fa"
 
-def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-vep"
+def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-vep-1"
 
 params {
   // gnomAD files
@@ -35,8 +35,9 @@ params {
 
   // tools
   annovarFolder="${annovarFolderDefined}"
-  CoCoRVFolder="/opt/cocorv/"
   // VEP
+  lofteeFolder="${vepPluginData}/loftee/loftee"
+  lofteeDataFolder="${vepPluginData}/loftee/data"
   caddSNV="${vepPluginData}/CADD/hg19/v1.7/whole_genome_SNVs.tsv.gz"
   caddIndel="${vepPluginData}/CADD/hg19/v1.7/gnomad.genomes-exomes.r4.0.indel.tsv.gz"
   spliceAISNV="${vepPluginData}/SpliceAI/spliceai_scores.raw.snv.hg19.vcf.gz"

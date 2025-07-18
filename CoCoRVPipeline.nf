@@ -25,6 +25,7 @@ include {coverageIntersect;
   extractGnomADPositions;
   mergeExtractedPositions;
   RFPrediction;
+  addSexToGroup;
   CoCoRV;
   mergeCoCoRVResults;
   QQPlotAndFDR;
@@ -83,7 +84,12 @@ workflow {
                             extractGnomADPositions.out[1].collect())
 
     RFPrediction(mergeExtractedPositions.out)
-    populationChannel = RFPrediction.out[1]
+    if (params.addSexToCaseGroup == "true") {
+      addSexToGroup(RFPrediction.out[1])
+      populationChannel = addSexToGroup.out
+    } else {
+      populationChannel = RFPrediction.out[1]
+    }
   } else {
     populationChannel = Channel.value(params.casePopulation)
   }

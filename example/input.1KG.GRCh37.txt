@@ -35,7 +35,6 @@ params {
 
   // tools
   annovarFolder="${annovarFolderDefined}"
-  CoCoRVFolder="/opt/cocorv/"
   // VEP
   caddSNV="${vepPluginData}/CADD/hg19/v1.7/whole_genome_SNVs.tsv.gz"
   caddIndel="${vepPluginData}/CADD/hg19/v1.7/gnomad.genomes-exomes.r4.0.indel.tsv.gz"

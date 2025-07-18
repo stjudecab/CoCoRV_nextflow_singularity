@@ -82,14 +82,14 @@ process annotate {
 
   if [[ ${params.annotationTool} == "VEP" ]]; then
     outputPrefix="${chr}.annotated"
-    bash -x ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${normalizedQCedVCFFile} ${reference} ${chr}.annotated ${params.reference} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.LOFTEE} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
+    bash -x ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${normalizedQCedVCFFile} ${reference} ${chr}.annotated ${params.refFASTA} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
   fi
   
   if [[ ${params.annotationTool} == "ANNOVAR_VEP" ]]; then
     outputPrefix="${chr}.annotated.annovar"
     bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
-    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.reference} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.LOFTEE} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.refFASTA} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
 
    fi
 
@@ -265,6 +265,22 @@ process RFPrediction {
   """
 }
 
+process addSexToGroup {
+  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  //container 'stithi/cocorv-nextflow-python:v5'
+
+  input: 
+    path casePopulation
+
+  output: 
+    path "casePopulationBySex.txt"
+
+  script:
+  """
+  Rscript /research/bsi/projects/staff_analysis/m301801/tools/cocorv/utilities/stratifiedBySex.R ${casePopulation} ${params.covariate} "casePopulationBySex.txt"
+  """
+}
+
 process CoCoRV {
   tag "$chr"
   publishDir "${params.outputRoot}/CoCoRV/byChr", mode: 'copy'
@@ -357,7 +373,7 @@ process CoCoRV {
       --checkHighLDInControl \
       --pLDControl ${params.pLDControl} \
       --fullCaseGenotype \
-      --reference ${params.build} \
+      --reference ${params.reference} \
       --gnomADVersion ${params.gnomADVersion} \
       --controlAnnoGDSFile ${controlAnnotated} \
       --caseAnnoGDSFile ${caseAnnoGDS} \

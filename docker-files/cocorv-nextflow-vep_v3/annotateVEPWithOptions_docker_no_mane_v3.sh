@@ -1,7 +1,7 @@
 set -euo pipefail
 
 main() {
-# usage: bash <script> ${vcfFile} ${ASSEMBLY} ${outputPrefix} ${REF} ${LOFTEEDIR} ${LOFTEEDATADIR} ${CADDSNVS} ${CADDINDELS} ${SPLICEAISNVS} ${SPLICEAIINDELS} ${AlphaMissenseDIR} ${LOFTEEDIR} ${REVELDIR} ${nThreads} ${annotations} ${VEPCACHE}
+# usage: bash <script> ${vcfFile} ${ASSEMBLY} ${outputPrefix} ${REF} ${LOFTEEDIR} ${LOFTEEDATADIR} ${CADDSNVS} ${CADDINDELS} ${SPLICEAISNVS} ${SPLICEAIINDELS} ${AlphaMissenseDIR} ${REVELDIR} ${nThreads} ${annotations} ${VEPCACHE}
 
 
 ### HANDLE INPUTS
@@ -9,24 +9,25 @@ vcfFile=$1
 ASSEMBLY=$2
 outputPrefix=$3
 REF=$4
-CADDSNVS=$5
-CADDINDELS=$6
-SPLICEAISNVS=$7
-SPLICEAIINDELS=$8
-AlphaMissenseDIR=$9
-LOFTEEDIR=${10}
-REVELDIR=${11}
-nThreads=${12}
-annotations=${13}
-VEPCACHE=${14}
+LOFTEEDIR=$5
+LOFTEEDATADIR=$6
+CADDSNVS=$7
+CADDINDELS=$8
+SPLICEAISNVS=$9
+SPLICEAIINDELS=${10}
+AlphaMissenseDIR=${11}
+REVELDIR=${12}
+nThreads=${13}
+annotations=${14}
+VEPCACHE=${15}
 
 ### SET VARIABLES
 if [ $ASSEMBLY == 'GRCh38' ]; then
-  LOFTEE="LoF,loftee_path:${LOFTEEDIR},human_ancestor_fa:/${LOFTEEDIR}/human_ancestor.GRCh38.fa.gz,conservation_file:/${LOFTEEDIR}/loftee.sql,gerp_bigwig:/${LOFTEEDIR}/gerp_conservation_scores.homo_sapiens.GRCh38.bw --dir_plugins ${LOFTEEDIR}"
+  LOFTEE="LoF,loftee_path:${LOFTEEDIR},human_ancestor_fa:${LOFTEEDATADIR}/human_ancestor.fa.gz,conservation_file:${LOFTEEDATADIR}/loftee.sql,gerp_bigwig:${LOFTEEDATADIR}/gerp_conservation_scores.homo_sapiens.GRCh38.bw"
   AlphaMissense="AlphaMissense,file=${AlphaMissenseDIR}/hg38/AlphaMissense_hg38.tsv.gz"
   REVEL="REVEL,file=${REVELDIR}/new_tabbed_revel_grch38.tsv.gz,no_match=1"
 elif [ $ASSEMBLY == 'GRCh37' ]; then
-    LOFTEE="LoF,loftee_path:${LOFTEEDIR},human_ancestor_fa:${LOFTEEDIR}/human_ancestor.fa.gz,conservation_file:${LOFTEEDIR}/phylocsf_gerp.sql,gerp_file:${LOFTEEDIR}/GERP_scores.final.sorted.txt.gz"
+    LOFTEE="LoF,loftee_path:${LOFTEEDIR},human_ancestor_fa:${LOFTEEDATADIR}/human_ancestor.fa.gz,conservation_file:${LOFTEEDATADIR}/phylocsf_gerp.sql,gerp_file:${LOFTEEDATADIR}/GERP_scores.final.sorted.txt.gz"
   AlphaMissense="AlphaMissense,file=${AlphaMissenseDIR}/hg19/AlphaMissense_hg19.tsv.gz"
   REVEL="REVEL,file=${REVELDIR}/new_tabbed_revel.tsv.gz,no_match=1"
 else
@@ -38,7 +39,7 @@ CADD="CADD,${CADDSNVS},${CADDINDELS}"
 SPLICEAI="SpliceAI,snv=${SPLICEAISNVS},indel=${SPLICEAIINDELS}"
 
 #perlThreadForLoftee="/research_jude/rgs01_jude/groups/cab/projects/Control/common/reference/VEP_v103/ensembl-vep/cache_hg38/cpanm/lib/perl5/x86_64-linux-thread"
-export PERL5LIB=${PERL5LIB}:${VEPCACHE}/Plugins
+export PERL5LIB=${PERL5LIB}:${LOFTEEDIR}
 echo ${PERL5LIB}
 
 annotationList=(${annotations//,/ })

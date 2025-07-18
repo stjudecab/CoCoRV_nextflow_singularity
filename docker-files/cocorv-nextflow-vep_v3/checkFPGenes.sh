@@ -3,15 +3,11 @@ main() {
   cocorvOut=$2
   topK=$3
   casecontrol=$4
-  cocorvOutputRoot=$5
-  build=$6
-  sampleList=$7
-  addVEP=$8
+  build=$5
+  sampleList=$6
+  addVEP=$7
 
-  variantFolder="${cocorvOutputRoot}/CoCoRV/byChr/"
-  vcfPrefix="${cocorvOutputRoot}/vcf_vqsr_normalizedQC/"
   vcfSuffix=".biallelic.leftnorm.ABCheck.vcf.gz"
-  vcfAnnoPrefix="${cocorvOutputRoot}/annotation/"
   vcfAnnoSuffix=".annotated.vcf.gz"
   outputFile="top${topK}.${cocorvOut}.${casecontrol}.variants.tsv"
   fullGenotype=T
@@ -22,8 +18,8 @@ main() {
     annotations="Gene.refGene,FILTER,Func.refGene,ExonicFunc.refGene,AAChange.refGene,REVEL"
   fi
 
-  bash ${CoCoRVFolder}/utilities/postCheckCoCoRV_docker.sh ${cocorvOut} ${topK} ${variantFolder} \
-    ${vcfAnnoPrefix} ${vcfAnnoSuffix} ${outputFile} ${casecontrol} ${fullGenotype} ${sampleList} ${build} ${annotations} ${vcfPrefix} ${vcfSuffix}
+  bash ${CoCoRVFolder}/utilities/postCheckCoCoRV_docker.sh ${cocorvOut} ${topK} \
+    ${vcfAnnoSuffix} ${outputFile} ${casecontrol} ${fullGenotype} ${sampleList} ${build} ${annotations} ${vcfSuffix}
 }
 
 main "$@"
