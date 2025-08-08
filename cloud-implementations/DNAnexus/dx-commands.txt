@@ -2,4 +2,4 @@ module load python/3.11.0
 dx --version
 dx v0.387.0
 
-dx build -a --nextflow cocorv-nextflow --destination CoCoRV_dev:/applets/nextflow-workflows/cocorv-nextflow_v4
+dx build -a --nextflow --cache-docker -v 1.0.0 cocorv-nf-core --destination CoCoRV_dev:/applets/nextflow-workflows/cocorv-nf-core

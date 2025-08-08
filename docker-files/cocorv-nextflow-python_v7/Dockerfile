@@ -1,20 +1,38 @@
 #! Dockerfile for installing tools and copying files and scripts for main CoCoRV package
 
 # Pull base image.
-FROM ensemblorg/ensembl-vep:release_103
+FROM ubuntu:22.04
 
 # Set maintainer.
 LABEL  description='Dockerfile for installing python 3.10, tools and copying files and scripts for main CoCoRV package' \
     maintainer="Saima Sultana Tithi, St. Jude Children's Research Hospital, <saimasultana.tithi@stjude.org>"
 
-USER root
-
 RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends software-properties-common \
     dirmngr libssl-dev libcurl4-openssl-dev libxml2-dev libopenblas-dev libopenblas-base liblapack3 wget curl git \
-    bedtools tabix samtools && \
+    bcftools bedtools tabix && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN apt-get update && apt-get install -y \
+    openjdk-8-jre-headless \
+    g++ \
+    python3.10 python3-pip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN apt-get update && apt-get install -y build-essential python3.10-dev libpq-dev && \
+    python3.10 -m pip install --trusted-host pypi.python.org pip --upgrade && \
+    python3.10 -m pip install --trusted-host pypi.python.org psycopg2-binary Cython numpy scikit-learn gnomad==0.7.1 hail==0.2.128 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN apt-get update && apt-get install -y libbz2-dev liblzma-dev libdeflate-dev && \
+    wget https://github.com/samtools/htslib/releases/download/1.20/htslib-1.20.tar.bz2 && \
+    tar -vxjf htslib-1.20.tar.bz2 && cd htslib-1.20 && ./configure --enable-libcurl --enable-s3 && make && make install
+
+RUN apt-get update && apt-get install -y samtools libdbi-perl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV PYSPARK_SUBMIT_ARGS="--driver-memory 40G pyspark-shell"
 
 # Define working directory.
 WORKDIR /opt
@@ -24,32 +42,17 @@ COPY Dockerfile /opt/
 
 RUN cd /opt && \
     git config --global http.sslVerify false && \   
-    git clone https://bitbucket.org/Wenan/cocorv.git && \
-    git clone --recurse-submodules https://github.com/samtools/htslib.git && \
-    git clone https://github.com/samtools/bcftools.git && \
-    cd bcftools && \
-    make && make install
-
-ENV BCFTOOLS_PLUGINS="/opt/bcftools/plugins"
-
-RUN apt-get update && apt-get install -y libdbi-perl && \
-    curl -k -L https://cpanmin.us | perl - App::cpanminus && \
-    cpanm DBD::SQLite && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    git clone https://bitbucket.org/Wenan/cocorv.git
 
 COPY gnomADPCAndAncestry_docker.sh /opt/cocorv/utilities
 COPY annotate_docker.sh /opt/cocorv/utilities
 COPY checkFPGenes.sh /opt/cocorv/utilities
 COPY postCheckCoCoRV_docker.sh /opt/cocorv/utilities
-COPY annotateVEPWithOptions_docker.sh /opt/cocorv/utilities
-COPY annotateVEPWithOptions_docker_no_mane_v3.sh /opt/cocorv/utilities
 
 RUN chmod -R a+x /opt/cocorv/utilities
 RUN chmod -R a+r /opt/cocorv/utilities
 
-COPY annovar /opt/annovar
-RUN chmod -R a+x /opt/annovar
-RUN chmod -R a+r /opt/annovar
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # by default /bin/bash is executed
 CMD ["/bin/bash"]

@@ -48,6 +48,7 @@ RUN cd /opt && \
     git clone https://bitbucket.org/Wenan/cocorv.git
 
 RUN chmod -R a+x /opt/cocorv/utilities
+RUN chmod -R a+r /opt/cocorv/utilities
 
 RUN cd /opt/cocorv && \
     Rscript build.R
