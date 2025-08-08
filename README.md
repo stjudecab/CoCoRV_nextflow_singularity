@@ -80,6 +80,9 @@ You can check all resource files for CoCoRV using this command:
 aws s3 ls s3://cocorv-resource-files/
 ```
 
+#### TODO ####
+* Move local path specific profiles to the input configuration file
+
 ### Contributors ###
 * Saima Sultana Tithi
 * Wenan Chen

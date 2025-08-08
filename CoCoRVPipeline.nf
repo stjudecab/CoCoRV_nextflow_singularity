@@ -10,7 +10,7 @@ Usage:
     nextflow run CoCoRVPipeline.nf -c inputConfig -profile profileName
 Input:
     * -c: Path of input config file.
-    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity"
+    * -profile: Specify which profile to use when executing nextflow pipeline. Available options are: "local", "cluster", "conda_gnomadv4", "cluster_singularity_lsf", "cluster_apptainer_slurm"
 """
 
 // Import modules
@@ -25,6 +25,7 @@ include {coverageIntersect;
   extractGnomADPositions;
   mergeExtractedPositions;
   RFPrediction;
+  addSexToGroup;
   CoCoRV;
   mergeCoCoRVResults;
   QQPlotAndFDR;
@@ -46,15 +47,16 @@ workflow {
   normalizeQC(params.caseVCFPrefix, chromChannel, params.caseVCFSuffix)
 
   // annotate
-  if (params.caseAnnotatedVCFPrefix == "NA") {
-    annotate(normalizeQC.out, params.build)
-    annotateChannel = annotate.out
-  } else {
-    skipAnnotation(normalizeQC.out)
-    annotateChannel = skipAnnotation.out
-  }
-
-  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {   
+  if (params.caseGenotypeGDSPrefix == "NA" && params.caseAnnotationGDSPrefix == "NA") {
+    // annotate
+    if (params.caseAnnotatedVCFPrefix == "NA") {
+      annotate(normalizeQC.out, params.reference)
+      annotateChannel = annotate.out
+    } else {
+      skipAnnotation(normalizeQC.out)
+      annotateChannel = skipAnnotation.out
+    }
+    
     // case genoypte vcf to gds
     caseGenotypeGDS(normalizeQC.out)
     caseGenotypeGDSChannel = caseGenotypeGDS.out
@@ -78,10 +80,16 @@ workflow {
     extractGnomADPositions(normalizeQC.out)
 
     // merge extracted gnomAD positions
-    mergeExtractedPositions(extractGnomADPositions.out.collect())
+    mergeExtractedPositions(extractGnomADPositions.out[0].collect(),
+                            extractGnomADPositions.out[1].collect())
 
     RFPrediction(mergeExtractedPositions.out)
-    populationChannel = RFPrediction.out[1]
+    if (params.addSexToCaseGroup == "true") {
+      addSexToGroup(RFPrediction.out[1])
+      populationChannel = addSexToGroup.out
+    } else {
+      populationChannel = RFPrediction.out[1]
+    }
   } else {
     populationChannel = Channel.value(params.casePopulation)
   }

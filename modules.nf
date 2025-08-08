@@ -12,7 +12,7 @@ process coverageIntersect {
 
   script:
   """
-  bedtools intersect -sorted -a ${caseBed} -b ${controlBed} > \
+  bedtools intersect -a ${caseBed} -b ${controlBed} | gzip > \
         "intersect.coverage10x.bed.gz"
   """
 }
@@ -57,7 +57,7 @@ process annotate {
 
   input:
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
-    val build
+    val reference
 
   output:
     tuple val("${chr}"),
@@ -66,25 +66,33 @@ process annotate {
 
   script:
   refbuild = null
-  if (build == "GRCh37") {
+  if (reference == "GRCh37") {
     refbuild="hg19"  
   }
   else {
-    if (build == "GRCh38") {
+    if (reference == "GRCh38") {
      refbuild="hg38"   
     }
   }
   """
-  if [[ ${params.addVEP} != "T" ]]; then
+  if [[ ${params.annotationTool} == "ANNOVAR" ]]; then
     outputPrefix="${chr}.annotated"
-  else 
-    outputPrefix="${chr}.annotated.annovar"
+    bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
   fi
-  bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
 
-  if [[ ${params.addVEP} == "T" ]]; then
-    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${chr}.annotated.annovar.vcf.gz ${build} ${chr}.annotated ${params.refFASTA} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
+  if [[ ${params.annotationTool} == "VEP" ]]; then
+    outputPrefix="${chr}.annotated"
+    bash -x ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${normalizedQCedVCFFile} ${reference} ${chr}.annotated ${params.refFASTA} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
   fi
+  
+  if [[ ${params.annotationTool} == "ANNOVAR_VEP" ]]; then
+    outputPrefix="${chr}.annotated.annovar"
+    bash ${params.CoCoRVFolder}/utilities/annotate_docker.sh ${normalizedQCedVCFFile} ${params.annovarFolder} ${refbuild} \${outputPrefix} ${params.VCFAnno} ${params.toml} ${params.protocol} ${params.operation}
+
+    bash ${params.CoCoRVFolder}/utilities/annotateVEPWithOptions_docker_no_mane_v3.sh ${chr}.annotated.annovar.vcf.gz ${reference} ${chr}.annotated ${params.refFASTA} ${params.lofteeFolder} ${params.lofteeDataFolder} ${params.caddSNV} ${params.caddIndel} ${params.spliceAISNV} ${params.spliceAIIndel} ${params.AM} ${params.REVEL} ${params.vepThreads} ${params.VEPAnnotations} ${params.VEPCACHE}
+
+   fi
+
   """
 }
  
@@ -122,7 +130,7 @@ process caseGenotypeGDS {
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 5
 
-  publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
+  //publishDir "${params.outputRoot}/vcf_vqsr_normalizedQC", mode: 'copy'
 
   input: 
     tuple val(chr), path(normalizedQCedVCFFile), path(indexFile)
@@ -145,7 +153,7 @@ process caseAnnotationGDS {
   errorStrategy { task.exitStatus in 130..140 ? 'retry' : 'terminate' }
   maxRetries 1
 
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  //publishDir "${params.outputRoot}/annotation", mode: 'copy'
 
   input: 
     tuple val(chr), path(annotatedFile), path(indexFile)
@@ -214,10 +222,12 @@ process extractGnomADPositions {
 
   output: 
     path "${chr}.extracted.vcf.gz"
+    path "${chr}.extracted.vcf.gz.tbi"
 
   script:
   """
   bcftools view -R ${params.gnomADPCPosition} -Oz -o ${chr}.extracted.vcf.gz ${normalizedQCedVCFFile}
+  bcftools index -t ${chr}.extracted.vcf.gz
   """
 }
 
@@ -227,13 +237,14 @@ process mergeExtractedPositions {
 
   input: 
     path extractedVCFFile
+    path extractedVCFFileIndex
 
   output: 
     path("all.extracted.vcf.bgz")
 
   script:
   """
-  bcftools concat -Oz -o "all.extracted.vcf.bgz" ${extractedVCFFile}
+  bcftools concat -a -Oz -o "all.extracted.vcf.bgz" ${extractedVCFFile}
   """
 }
 
@@ -250,7 +261,23 @@ process RFPrediction {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/gnomADPCAndAncestry_docker.sh ${params.CoCoRVFolder} ${params.loadingPath} ${params.rfModelPath} ${VCFForPrediction} ${params.build} "PC.population.output.gz" ${params.threshold} "casePopulation.txt"
+  bash ${params.CoCoRVFolder}/utilities/gnomADPCAndAncestry_docker.sh ${params.CoCoRVFolder} ${params.loadingPath} ${params.rfModelPath} ${VCFForPrediction} ${params.reference} "PC.population.output.gz" ${params.threshold} "casePopulation.txt"
+  """
+}
+
+process addSexToGroup {
+  publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
+  //container 'stithi/cocorv-nextflow-python:v5'
+
+  input: 
+    path casePopulation
+
+  output: 
+    path "casePopulationBySex.txt"
+
+  script:
+  """
+  Rscript /research/bsi/projects/staff_analysis/m301801/tools/cocorv/utilities/stratifiedBySex.R ${casePopulation} ${params.covariate} "casePopulationBySex.txt"
   """
 }
 
@@ -274,20 +301,46 @@ process CoCoRV {
     path("${chr}.control.group")
 
   script:
+  chrOnly = chr
+  start = ""
+  end = ""
   if (chr == "NA") {
-    controlAnnotated = params.controlAnnoPrefix + params.controlAnnoSuffix
-    controlCount = params.controlCountPrefix + params.controlCountSuffix 
+    // NA to use no chr in the controls
+    chrOnly = "" 
+  } else if (chr.matches(".*_.*")) {
+    // this is useful for shad based case data, such as 1_13004384_121976459
+    // for chromosome 1 within the region 13004384:121976459, and will match
+    // chromosome 1 for the control data
+    parts = chr.split("_")
+    chrOnly = parts[0]
+    start = parts[1]
+    end = parts[2]
   } else {
-    controlAnnotated = params.controlAnnoPrefix + chr+params.controlAnnoSuffix
-    controlCount = params.controlCountPrefix + chr + params.controlCountSuffix 
   }
+  controlAnnotated=params.controlAnnoPrefix+chrOnly+params.controlAnnoSuffix
+  controlCount=params.controlCountPrefix+chrOnly+params.controlCountSuffix
   """
+  if [[ "${start}" != "" ]]; then
+    # overlap with the shad region
+    checkChr=\$(zcat ${intersectBed} | head -1 | cut -f1)
+    if [[ \${checkChr} =~ "chr" ]]; then
+      chrString="chr"$chrOnly
+    else
+      chrString=$chrOnly
+    fi
+    finalBed="intersect.bed.gz"
+    printf "\$chrString\t$start\t$end\n" > shad.bed
+    bedtools intersect -a ${intersectBed} -b shad.bed | gzip > \${finalBed}
+  else
+    finalBed=${intersectBed}
+  fi
+
   otherOptions=""
   if [[ "${params.CoCoRVOptions}" != "NA" ]]; then
     otherOptions="${params.CoCoRVOptions}"
   fi
-  if [[ "${params.groupFunctionConfig}" != "NA" ]]; then
-    otherOptions="\${otherOptions} --variantGroupCustom ${params.groupFunctionConfig}"
+  if [[ "${params.variantGroupCustom}" != "NA" ]]; then
+    otherOptions="\${otherOptions} --variantGroupCustom ${params.variantGroupCustom}"
   fi
   if [[ "${params.extraParamJason}" != "NA" ]]; then
     otherOptions="\${otherOptions} --extraParamJason ${params.extraParamJason}"
@@ -309,7 +362,7 @@ process CoCoRV {
       --sampleList ${params.caseSample} \
       --outputPrefix ${chr} \
       --AFMax ${params.AFMax} \
-      --bed ${intersectBed} \
+      --bed \${finalBed} \
       --variantMissing ${params.variantMissing} \
       --groupColumn ${params.groupColumn} \
       --variantGroup ${params.variantGroup} \
@@ -320,7 +373,7 @@ process CoCoRV {
       --checkHighLDInControl \
       --pLDControl ${params.pLDControl} \
       --fullCaseGenotype \
-      --reference ${params.build} \
+      --reference ${params.reference} \
       --gnomADVersion ${params.gnomADVersion} \
       --controlAnnoGDSFile ${controlAnnotated} \
       --caseAnnoGDSFile ${caseAnnoGDS} \
@@ -390,7 +443,7 @@ process QQPlotAndFDR {
   """
   Rscript ${params.CoCoRVFolder}/utilities/QQPlotAndFDR.R "association.tsv" \
            "association.tsv.dominant.nRep1000" --setID gene \
-      --outColumns gene --n 1000 \
+      --outColumns gene,P_DOM,OR_DOM,CI_Lower_DOM,CI_Upper_DOM --n 1000 \
       --pattern "case.*Mutation.*_DOM\$|control.*Mutation.*_DOM\$" \
       --FDR
   """
@@ -414,6 +467,6 @@ process postCheck {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.build} ${params.caseSample} ${params.addVEP}
+  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.reference} ${params.caseSample} ${params.addVEP}
   """
 }
