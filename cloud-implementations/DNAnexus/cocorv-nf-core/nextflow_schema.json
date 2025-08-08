@@ -1,0 +1,139 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/rarevariantburden/master/nextflow_schema.json",
+    "title": "nf-core/rarevariantburden pipeline parameters",
+    "description": "This pipeline include tools for performing consistent summary count based rare variant burden test, which is useful when we only have sequenced cases data, no control data; here we can compare the cases against public summary count data, such as gnomAD data",
+    "type": "object",
+    "definitions": {
+        "inputs": {
+            "title": "Inputs",
+            "type": "object",
+            "default": "",
+            "description": "Define where the pipeline should find input data and save output data.",
+            "required": [
+                "caseVCFFileList",
+                "caseSample",
+                "controlDataFolder",
+                "annovarFolder",
+                "vepFolder"
+            ],
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "default": "./results",
+                    "description": "The output directory where the results will be saved.",
+                    "format": "directory-path"
+                },
+                "caseSample": {
+                    "type": "string",
+                    "description": "One column text file containing list of samples, one sample ID per line.",
+                    "format": "file-path"
+                },
+                "controlDataFolder": {
+                    "type": "string",
+                    "default": "dx://project-GbgkP9003Q2ZzB64QjJY3Q3Q:/resource_folder/gnomADv2exome",
+                    "description": "Input files needed for the pipeline from the control dataset, for now we support 3 gnomAD datasets as control, gnomADv2exome, gnomADv4.1exome, gnomADv4.1genome.",
+                    "format": "directory-path"
+                },
+                "annovarFolder": {
+                    "type": "string",
+                    "default": "dx://project-GbgkP9003Q2ZzB64QjJY3Q3Q:/resource_folder/annovarFolder",
+                    "description": "Resource folder for the annotation tool Annovar.",
+                    "format": "directory-path"
+                },
+                "vepFolder": {
+                    "type": "string",
+                    "default": "dx://project-GbgkP9003Q2ZzB64QjJY3Q3Q:/resource_folder/vepFolder",
+                    "description": "Resource folder for the annotation tool VEP.",
+                    "format": "directory-path"
+                },
+                "build": {
+                    "type": "string",
+                    "default": "GRCh37",
+                    "description": "Reference genome build version, allowed values are \"GRCh37\", \"GRCh38\". Default value: \"GRCh37\"\""
+                },
+                "gnomADVersion": {
+                    "type": "string",
+                    "default": "v2exome",
+                    "description": "gnomAD version, allowed values are \"v2exome\", \"v4exome\", \"v4genome\" (for GRCh37 data use \"v2exome\", for GRCh38, use \"v4exome\" or \"v4genome\"). Default value: \"v2exome\"\""
+                },
+                "caseBed": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Bed file containing good coverage positions from case vcf files where 90% samples have coverage >= 10.",
+                    "format": "file-path"
+                },
+                "addVEP": {
+                    "type": "string",
+                    "default": "F",
+                    "description": "If you want to add VEP annotation, you need to put \"T\" for this parameter. Default: \"F\", meaning do not run VEP annotaion, only run Annovar."
+                },
+                "casePopulation": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "File containing estimation of the population/ethnicity of case samples using gnomAD classifier, optional, if not specified nextflow app will estimate the population using gnomAD classifier.",
+                    "format": "file-path"
+                },
+                "groupFunctionConfig": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "An optional R file with functions or a tab separated two column text file defining the variants of interest",
+                    "format": "file-path"
+                },
+                "groupColumn": {
+                    "type": "string",
+                    "default": "Gene.refGene",
+                    "description": "The column header used to pull Gene name from annotation file"
+                },
+                "variantGroup": {
+                    "type": "string",
+                    "default": "annovar_pathogenic",
+                    "description": "A specified variant group to use for test or a self defined function to define the variants of interest"
+                },
+                "AFMax": {
+                    "type": "number",
+                    "default": 0.0001,
+                    "description": "The maximum of the alternate allele frequency, for gnomADv2exome, we used 0.0001, for gnomADv4.1genome and v4.1exome, we used 0.0005"
+                },
+                "REVELThreshold": {
+                    "type": "number",
+                    "default": 0.65,
+                    "description": "The minimum REVEL score for pathogenic missense variants"
+                },
+                "topK": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Top K genes for generating variant-sample list"
+                },
+                "caseVCFFileList": {
+                    "type": "string",
+                    "description": "If you split you joined called VCF file by chromosome, you can supply the VCF file list here",
+                    "format": "file-path"
+                },
+                "caseAnnotatedVCFFileList": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "Pre-annotated case VCF files, you can use the pre-annotated case VCF files to skip the annotation steps in the pipeline",
+                    "format": "file-path"
+                },
+                "caseGenotypeGDSFileList": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "GDS converted genotype case VCF files, you can use it to skip the genotype GDS conversion steps in the pipeline",
+                    "format": "file-path"
+                },
+                "caseAnnotationGDSFileList": {
+                    "type": "string",
+                    "default": "NA",
+                    "description": "GDS converted annotated case VCF files, you can use it to skip the annotation GDS conversion steps in the pipeline",
+                    "format": "file-path"
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/inputs"
+        }
+    ]
+}
