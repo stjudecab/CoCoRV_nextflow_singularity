@@ -47,7 +47,8 @@ process normalizeQC {
 
 process annotate {
   tag "${chr}"
-  publishDir "${params.outputRoot}/annotation", mode: 'copy'
+  publishDir "${params.outputRoot}/annotation", mode: 'copy', pattern: '*.vcf.gz*'
+  publishDir "${params.outputRoot}/annotation/logs", mode: 'copy', overwrite: true, pattern: '*.log'
   container 'stithi/cocorv-nextflow-vep:v3'
 
   cpus params.vepThreads
@@ -63,6 +64,7 @@ process annotate {
     tuple val("${chr}"),
           path("${chr}.annotated.vcf.gz"),
           path("${chr}.annotated.vcf.gz.tbi")
+    path("${chr}.annotated_vep.log"), optional: true
 
   script:
   refbuild = null
@@ -267,7 +269,7 @@ process RFPrediction {
 
 process addSexToGroup {
   publishDir "${params.outputRoot}/gnomADPosition", mode: 'copy'
-  //container 'stithi/cocorv-nextflow-python:v5'
+  container 'stithi/cocorv-nextflow-r:v5'
 
   input: 
     path casePopulation
@@ -277,7 +279,7 @@ process addSexToGroup {
 
   script:
   """
-  Rscript /research/bsi/projects/staff_analysis/m301801/tools/cocorv/utilities/stratifiedBySex.R ${casePopulation} ${params.covariate} "casePopulationBySex.txt"
+  Rscript ${params.CoCoRVFolder}/utilities/stratifiedBySex.R ${casePopulation} ${params.covariate} "casePopulationBySex.txt"
   """
 }
 
@@ -467,6 +469,10 @@ process postCheck {
 
   script:
   """
-  bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.reference} ${params.caseSample} ${params.addVEP}
+  if [[ ${params.annotationTool} == "ANNOVAR" ]]; then
+    bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.reference} ${params.caseSample} "F"
+  elif [[ ${params.annotationTool} == "VEP" || ${params.annotationTool} == "ANNOVAR_VEP" ]]; then
+    bash ${params.CoCoRVFolder}/utilities/checkFPGenes.sh ${params.CoCoRVFolder} ${associationResult} ${topK} ${caseControl} ${params.outputRoot} ${params.reference} ${params.caseSample} "T"
+  fi
   """
 }

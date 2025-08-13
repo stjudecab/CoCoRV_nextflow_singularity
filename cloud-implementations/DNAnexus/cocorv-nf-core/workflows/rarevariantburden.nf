@@ -70,6 +70,7 @@ workflow RAREVARIANTBURDEN {
 
     // annotate
     if (params.caseAnnotatedVCFFileList == "NA") {
+        
         annotate(normalizeQCChannel, params.build, params.annovarFolder, params.vepFolder, params.refFASTA)
         annotateChannel = annotate.out
     } else {

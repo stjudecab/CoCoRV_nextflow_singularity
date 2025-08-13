@@ -92,14 +92,14 @@ vep --cache --dir ${VEPCACHE} \
 
 ## IMPROVE VEP ANNOTATION BY SPLITTING
 bcftools +split-vep \
-  -c SYMBOL,Consequence,${columnString} \
+  -c SYMBOL,Consequence,BIOTYPE,HGVSp,${columnString} \
   -Oz -o ${outputPrefix}.tmp.vep.vcf.gz ${outputPrefix}.tmp.vcf.gz
 tabix -p vcf ${outputPrefix}.tmp.vep.vcf.gz
 
 ### APPLY CLEANED ANNOTATIONS
 bcftools annotate -a ${outputPrefix}.tmp.vep.vcf.gz \
   --collapse none \
-  -c CSQ,SYMBOL,Consequence,${columnString} \
+  -c CSQ,SYMBOL,Consequence,BIOTYPE,HGVSp,${columnString} \
   -Oz -o ${outputPrefix}.vcf.gz ${vcfFile}
 tabix -p vcf ${outputPrefix}.vcf.gz
 

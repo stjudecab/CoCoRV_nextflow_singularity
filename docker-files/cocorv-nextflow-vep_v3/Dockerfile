@@ -37,10 +37,7 @@ RUN apt-get update && apt-get install -y libdbi-perl && \
     cpanm DBD::SQLite && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY gnomADPCAndAncestry_docker.sh /opt/cocorv/utilities
 COPY annotate_docker.sh /opt/cocorv/utilities
-COPY checkFPGenes.sh /opt/cocorv/utilities
-COPY postCheckCoCoRV_docker.sh /opt/cocorv/utilities
 COPY annotateVEPWithOptions_docker.sh /opt/cocorv/utilities
 COPY annotateVEPWithOptions_docker_no_mane_v3.sh /opt/cocorv/utilities
 

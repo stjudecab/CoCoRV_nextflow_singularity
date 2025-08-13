@@ -13,7 +13,7 @@ main() {
   fullGenotype=T
   
   if [[ ${addVEP} == "T" ]]; then
-    annotations="SYMBOL,FILTER,Func.refGene,ExonicFunc.refGene,AAChange.refGene,REVEL,am_class,am_pathogenicity,SpliceAI_pred_DP_AG,SpliceAI_pred_DP_AL,SpliceAI_pred_DP_DG,SpliceAI_pred_DP_DL,SpliceAI_pred_DS_AG,SpliceAI_pred_DS_AL,SpliceAI_pred_DS_DG,SpliceAI_pred_DS_DL,LoF,LoF_filter,LoF_flags,LoF_info,CADD_PHRED,CADD_RAW"
+    annotations="SYMBOL,FILTER,Consequence,HGVSp,REVEL,am_class,am_pathogenicity,SpliceAI_pred_DP_AG,SpliceAI_pred_DP_AL,SpliceAI_pred_DP_DG,SpliceAI_pred_DP_DL,SpliceAI_pred_DS_AG,SpliceAI_pred_DS_AL,SpliceAI_pred_DS_DG,SpliceAI_pred_DS_DL,LoF,LoF_filter,LoF_flags,LoF_info,CADD_PHRED,CADD_RAW"
   else  
     annotations="Gene.refGene,FILTER,Func.refGene,ExonicFunc.refGene,AAChange.refGene,REVEL"
   fi

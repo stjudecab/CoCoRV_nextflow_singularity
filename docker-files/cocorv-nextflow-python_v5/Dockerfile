@@ -49,12 +49,9 @@ COPY checkFPGenes.sh /opt/cocorv/utilities
 COPY postCheckCoCoRV_docker.sh /opt/cocorv/utilities
 
 RUN chmod -R a+x /opt/cocorv/utilities
-
-COPY annovar /opt/annovar
-RUN chmod -R a+x /opt/annovar
+RUN chmod -R a+r /opt/cocorv/utilities
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN ln -s /usr/lib/x86_64-linux-gnu/perl5/5.34 /usr/lib/x86_64-linux-gnu/perl/5.34
 
 # by default /bin/bash is executed
 CMD ["/bin/bash"]

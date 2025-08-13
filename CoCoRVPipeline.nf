@@ -51,7 +51,7 @@ workflow {
     // annotate
     if (params.caseAnnotatedVCFPrefix == "NA") {
       annotate(normalizeQC.out, params.reference)
-      annotateChannel = annotate.out
+      annotateChannel = annotate.out[0]
     } else {
       skipAnnotation(normalizeQC.out)
       annotateChannel = skipAnnotation.out

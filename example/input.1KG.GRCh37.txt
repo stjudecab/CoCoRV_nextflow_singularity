@@ -8,7 +8,7 @@ def annovarFolderDefined="/research/groups/cab/projects/Control/common/reference
 
 def referenceDefined="/research/rgs01/applications/hpcf/authorized_apps/cab/Automation/REF/Homo_sapiens/NCBI/GRCh37-lite/bwa-index/GRCh37-lite_wochr/GRCh37-lite.fa"
 
-def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-3"
+def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV-1KG-GRCh37-output"
 
 params {
   // gnomAD files
@@ -36,6 +36,8 @@ params {
   // tools
   annovarFolder="${annovarFolderDefined}"
   // VEP
+  lofteeFolder="${vepPluginData}/loftee/loftee"
+  lofteeDataFolder="${vepPluginData}/loftee/data"
   caddSNV="${vepPluginData}/CADD/hg19/v1.7/whole_genome_SNVs.tsv.gz"
   caddIndel="${vepPluginData}/CADD/hg19/v1.7/gnomad.genomes-exomes.r4.0.indel.tsv.gz"
   spliceAISNV="${vepPluginData}/SpliceAI/spliceai_scores.raw.snv.hg19.vcf.gz"
@@ -46,7 +48,8 @@ params {
 
   // reference
   refFASTA="${referenceDefined}" 
-  build="GRCh37" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
+  reference="GRCh37" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
+  gnomADVersion="v2exome"
   // later I may include chr X
   chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
   // chrSet="21 22"

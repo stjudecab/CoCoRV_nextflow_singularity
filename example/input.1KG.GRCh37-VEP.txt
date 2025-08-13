@@ -8,7 +8,7 @@ def annovarFolderDefined="/research/groups/cab/projects/Control/common/reference
 
 def referenceDefined="/research/rgs01/applications/hpcf/authorized_apps/cab/Automation/REF/Homo_sapiens/NCBI/GRCh37-lite/bwa-index/GRCh37-lite_wochr/GRCh37-lite.fa"
 
-def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity/CoCoRV-1KG-GRCh37-output-vep-1"
+def outputFolder="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV-1KG-GRCh37-output-VEP"
 
 params {
   // gnomAD files
@@ -46,9 +46,11 @@ params {
   REVEL="${vepPluginData}/REVEL"
   VEPCACHE="${vepFolderDefined}/cache"
 
+  annotationTool="VEP"
   // reference
   refFASTA="${referenceDefined}" 
-  build="GRCh37" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
+  reference="GRCh37" // GRCh37 for gnomAD v2 or GRCh38 for gnomAD v3
+  gnomADVersion="v2exome"
   // later I may include chr X
   chrSet="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22"
   // chrSet="21 22"
@@ -58,7 +60,7 @@ params {
   variantExclude="${controlRoot}/exomes/failed/gnomAD.exclude.allow.segdup.lcr.v3.txt.gz"
   AFMax=1e-4
   variantMissing=0.1
-  groupFunctionConfig="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity_test_vep/variantGroupVEP.txt"
+  variantGroupCustom="/research/rgs01/home/clusterHome/stithi/CoCoRV_pipeline_bitbucket/cocorv_pipeline/CoCoRV_nextflow_singularity_test_vep/variantGroupVEP.txt"
   variantGroup="vep_lof"
   //variantGroup="vep_lof_missense_am"
   //variantGroup="vep_lof_missense_revel0.65"
@@ -66,8 +68,5 @@ params {
   REVELThreshold=0.65
   pLDControl=0.05
   highLDVariantFile="${controlRoot}/full_vs_gnomAD.p0.05.OR1.ignoreEthnicityInLD.rds"
-
-  topK=50
-  addVEP="T"
 
 }
